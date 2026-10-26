@@ -11,7 +11,7 @@ spec:
   chart:
     spec:
       chart: base
-      version: "1.30.3"
+      version: "1.30.7"
       sourceRef:
         kind: HelmRepository
         name: istio
@@ -21,7 +21,7 @@ spec:
   upgrade:
     crds: CreateReplace
   values:
-    defaultRevision: 1-30-3
+    defaultRevision: 1-30-7
 
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
@@ -40,7 +40,7 @@ spec:
   chart:
     spec:
       chart: cni
-      version: "1.30.3"
+      version: "1.30.7"
       sourceRef:
         kind: HelmRepository
         name: istio
@@ -51,7 +51,7 @@ spec:
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: istiod-1-30-3
+  name: istiod-1-30-7
   namespace: istio-system
 spec:
   serviceAccountName: cluster-reconciler
@@ -64,12 +64,12 @@ spec:
   chart:
     spec:
       chart: istiod
-      version: "1.30.3"
+      version: "1.30.7"
       sourceRef:
         kind: HelmRepository
         name: istio
   values:
-    revision: 1-30-3
+    revision: 1-30-7
     profile: ambient
 
 ---
@@ -84,14 +84,14 @@ spec:
   timeout: 5m
 
   dependsOn:
-    - name: istiod-1-30-3
+    - name: istiod-1-30-7
 
   chart:
     spec:
       chart: ztunnel
-      version: "1.30.3"
+      version: "1.30.7"
       sourceRef:
         kind: HelmRepository
         name: istio
   values:
-    revision: 1-30-3
+    revision: 1-30-7
