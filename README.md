@@ -8,8 +8,8 @@ The cluster moves from `clusters/cluster-02-rke2` and `apps/` to `clusters/homel
 
 | Component | Where |
 | --- | --- |
-| Flux Operator, the FluxInstance | `platform/flux-operator`, `clusters/homelab` |
-| Cilium, Gateway API, Istio, the host firewall, tenants | `apps/`, `clusters/cluster-02-rke2`, not migrated yet |
+| Flux Operator, the FluxInstance, Cilium | `platform/`, `clusters/homelab` |
+| Gateway API, Istio, the host firewall, tenants | `apps/`, `clusters/cluster-02-rke2`, not migrated yet |
 
 ## How it reconciles
 
@@ -21,7 +21,7 @@ Flux runs in multitenant mode: cross-namespace references are off, and a Kustomi
 
 ```
 clusters/homelab/      the cluster: its FluxInstance, and a Kustomization per component
-platform/<component>/  chart source and version, HelmRelease, values
+platform/<component>/  namespace, chart source and version, HelmRelease, values
 archive/               retired clusters, not reconciled
 apps/, clusters/cluster-02-rke2/   the old layout, until it's migrated
 ```
@@ -30,13 +30,14 @@ apps/, clusters/cluster-02-rke2/   the old layout, until it's migrated
 
 ## Bootstrap
 
-The FluxInstance needs Flux Operator to exist first. k8s-infra installs Flux Operator with Helm from this repository's files, then applies the FluxInstance:
+Flux needs a CNI to run, so Cilium has to exist before Flux does, and the FluxInstance needs Flux Operator. k8s-infra installs Cilium and Flux Operator with Helm, then applies the FluxInstance, reading everything from this repository:
 
 | File | Read for |
 | --- | --- |
-| `platform/flux-operator/oci-repository.yaml` | Chart URL and version |
-| `platform/flux-operator/helm-release.yaml` | Release name and namespace |
-| `platform/flux-operator/values.yaml` | Values |
+| `platform/<component>/namespace.yaml` | The namespace, with its Pod Security labels |
+| `platform/<component>/oci-repository.yaml` | Chart URL and version |
+| `platform/<component>/helm-release.yaml` | Release name and namespace |
+| `platform/<component>/values.yaml` | Values |
 | `clusters/homelab/flux-instance.yaml` | The FluxInstance, applied as is |
 
-Flux then adopts the release, and from there on manages it, the FluxInstance and itself. An upgrade is a change in this repository only, and the next cluster bootstraps at the same versions.
+Flux then adopts both Helm releases, and from there on manages them, the FluxInstance and itself. An upgrade is a change in this repository only, and the next cluster bootstraps at the same versions.

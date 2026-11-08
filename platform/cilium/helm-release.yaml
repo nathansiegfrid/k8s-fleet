@@ -2,19 +2,19 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: cilium
-  namespace: cilium-system
+  namespace: flux-system
 spec:
-  serviceAccountName: cluster-reconciler
+  serviceAccountName: helm-controller
   interval: 1h
-  timeout: 5m
+  timeout: 10m
 
-  chart:
-    spec:
-      chart: cilium
-      version: "1.20.4"
-      sourceRef:
-        kind: HelmRepository
-        name: cilium
+  chartRef:
+    kind: OCIRepository
+    name: cilium
+  releaseName: cilium
+  targetNamespace: cilium-system
+  storageNamespace: cilium-system
+
   valuesFrom:
     - kind: ConfigMap
       name: cilium-values

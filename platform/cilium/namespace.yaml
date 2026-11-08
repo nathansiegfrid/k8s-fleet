@@ -3,6 +3,7 @@ kind: Namespace
 metadata:
   name: cilium-system
   annotations:
+    # Keep the CNI's namespace even if this component is removed.
     kustomize.toolkit.fluxcd.io/prune: disabled
   labels:
     pod-security.kubernetes.io/enforce: privileged
