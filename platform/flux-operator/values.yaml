@@ -1,0 +1,5 @@
+# ResourceSets outside flux-system must name a ServiceAccount to run as.
+# The tenants ResourceSet lives in flux-system, so it keeps the operator's
+# own permissions.
+multitenancy:
+  enabled: true

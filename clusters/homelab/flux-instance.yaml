@@ -1,3 +1,5 @@
+# k8s-infra applies this exact file to bootstrap the cluster. After the first
+# sync, Flux manages it like everything else in this repository.
 apiVersion: fluxcd.controlplane.io/v1
 kind: FluxInstance
 metadata:
@@ -10,11 +12,14 @@ spec:
   cluster:
     type: kubernetes
     size: medium
+    # Turns off cross-namespace references, and makes every Kustomization and
+    # HelmRelease without serviceAccountName impersonate `<namespace>:flux`.
     multitenant: true
     tenantDefaultServiceAccount: flux
   sync:
     kind: GitRepository
     url: ssh://git@github.com/nathansiegfrid/k8s-fleet.git
     ref: refs/heads/main
-    path: ./clusters/cluster-02-rke2
+    path: ./clusters/homelab
+    # Created by k8s-infra from its encrypted secrets.
     pullSecret: flux-system
