@@ -32,6 +32,12 @@ ipam:
 hostFirewall:
   enabled: true
 
+# Log what the policies would drop instead of dropping it, while the host
+# firewall policies are new. It applies to every endpoint, pods included,
+# so turn it off before tenants arrive. The agents read it only at startup:
+# after a change, run `kubectl -n cilium-system rollout restart ds/cilium`.
+policyAuditMode: true
+
 # === ISTIO AMBIENT SUPPORT ===
 
 # Let Istio's CNI plugin chain after Cilium.
