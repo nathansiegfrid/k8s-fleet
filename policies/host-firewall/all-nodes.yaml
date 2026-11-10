@@ -38,10 +38,12 @@ spec:
             - port: "10250"
               protocol: TCP
 
-    # Cilium health checks.
+    # Cilium health checks. Every node's agent probes every other node's on
+    # 4240, as `remote-node`.
     - fromEntities:
         - health
         - host
+        - remote-node
       toPorts:
         - ports:
             - port: "4240"
