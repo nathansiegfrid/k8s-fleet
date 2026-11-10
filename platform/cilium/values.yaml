@@ -9,10 +9,14 @@ namespaceOverride: cilium-system
 
 # kube-proxy isn't deployed on this cluster, so Cilium replaces it.
 kubeProxyReplacement: true
+# On RKE2, localhost:6443 works on every node: the agent runs a built-in
+# load balancer on workers that forwards to the masters' API servers.
 k8sServiceHost: localhost
 k8sServicePort: "6443"
 
-# Cilium Operator must run on control-plane nodes to reach localhost:6443.
+# Keep Cilium Operator on the control-plane nodes, where tenants' pods
+# can't run: its token reads every Secret in the cluster and can rewrite
+# network policies, so a container escape on a worker mustn't reach it.
 operator:
   nodeSelector:
     node-role.kubernetes.io/control-plane: "true"
