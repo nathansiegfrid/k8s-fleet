@@ -3,3 +3,13 @@
 # own permissions.
 multitenancy:
   enabled: true
+
+# Keep Flux Operator on the control-plane nodes, where tenants' pods can't
+# run: its token is cluster-admin, so a container escape on a worker
+# mustn't reach it. The toleration is for the masters' NoSchedule taint.
+nodeSelector:
+  node-role.kubernetes.io/control-plane: "true"
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule

@@ -23,3 +23,24 @@ spec:
     path: ./clusters/homelab
     # Created by k8s-infra from its encrypted secrets.
     pullSecret: flux-system
+  # Keep the Flux controllers on the control-plane nodes, where tenants' pods
+  # can't run: kustomize-controller and helm-controller are cluster-admin.
+  # The toleration is for the masters' NoSchedule taint.
+  kustomize:
+    patches:
+      - target:
+          kind: Deployment
+        patch: |
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: all
+          spec:
+            template:
+              spec:
+                nodeSelector:
+                  node-role.kubernetes.io/control-plane: "true"
+                tolerations:
+                  - key: node-role.kubernetes.io/control-plane
+                    operator: Exists
+                    effect: NoSchedule
