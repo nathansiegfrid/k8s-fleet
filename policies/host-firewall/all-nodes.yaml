@@ -1,15 +1,3 @@
-# Deployed by Ansible.
-# Do not edit manually, changes will be overwritten.
-#
-# Required RKE2 ports:
-# https://docs.rke2.io/install/requirements#inbound-network-rules
-#
-# Required Istio ports:
-# https://istio.io/latest/docs/ops/deployment/application-requirements/#ports-used-by-istio
-#
-# List of Cilium entities:
-# https://docs.cilium.io/en/latest/security/policy/layer3/#entities-based
-
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
@@ -18,6 +6,7 @@ spec:
   nodeSelector:
     matchLabels: {}
   ingress:
+    # Public: ping, HTTP(S) and WireGuard.
     - icmps:
         - fields:
             - type: EchoRequest
@@ -28,10 +17,10 @@ spec:
               protocol: TCP
             - port: "443"
               protocol: TCP
-            - port: "41820" # WireGuard port
+            - port: "41820" # WireGuard
               protocol: UDP
 
-    # Allow SSH on WireGuard network.
+    # SSH only over WireGuard.
     - fromCIDR:
         - 10.0.0.0/24
       toPorts:
@@ -39,7 +28,7 @@ spec:
             - port: "22"
               protocol: TCP
 
-    # Allow kubelet API/metrics from API server and cluster.
+    # Kubelet API and metrics.
     - fromEntities:
         - kube-apiserver
         - host
@@ -49,7 +38,7 @@ spec:
             - port: "10250"
               protocol: TCP
 
-    # Allow Cilium CNI health checks.
+    # Cilium health checks.
     - fromEntities:
         - health
         - host
@@ -58,94 +47,40 @@ spec:
             - port: "4240"
               protocol: TCP
 
-    # Allow node-to-node CNI overlay traffic.
+    # Cilium VXLAN overlay between nodes.
     - fromEntities:
         - host
         - remote-node
       toPorts:
         - ports:
-            - port: "8472" # Cilium CNI with VXLAN
-              protocol: UDP
-            - port: "51871" # Cilium CNI with WireGuard
+            - port: "8472"
               protocol: UDP
 
-    # Allow Istio ambient mesh (ztunnel) node-to-node traffic.
+    # Istio ambient (ztunnel) between nodes.
     - fromEntities:
         - host
         - remote-node
       toPorts:
         - ports:
-            - port: "15008" # HBONE mTLS tunnel (ztunnel)
+            - port: "15008" # HBONE mTLS tunnel
               protocol: TCP
-            - port: "15020" # Merged Prometheus telemetry from ztunnel/agent
+            - port: "15020" # Merged Prometheus telemetry
               protocol: TCP
-            - port: "15021" # Istio health check endpoint
+            - port: "15021" # Health check
               protocol: TCP
             - port: "15090" # Envoy Prometheus telemetry
               protocol: TCP
 
-    # Allow istiod control plane from within cluster.
+    # istiod from inside the cluster.
     - fromEntities:
         - cluster
       toPorts:
         - ports:
-            - port: "15010" # Istiod XDS plaintext gRPC
+            - port: "15010" # XDS, plaintext gRPC
               protocol: TCP
-            - port: "15012" # Istiod XDS mTLS gRPC
+            - port: "15012" # XDS, mTLS gRPC
               protocol: TCP
-            - port: "15014" # Istiod control plane metrics
+            - port: "15014" # Control-plane metrics
               protocol: TCP
-            - port: "15017" # Istio webhook server
-              protocol: TCP
-
----
-apiVersion: cilium.io/v2
-kind: CiliumClusterwideNetworkPolicy
-metadata:
-  name: rke2-master-nodes
-spec:
-  nodeSelector:
-    matchLabels:
-      node-role.kubernetes.io/control-plane: "true"
-  ingress:
-    # Allow Kubernetes API from within cluster.
-    - fromEntities:
-        - cluster
-      toPorts:
-        - ports:
-            - port: "6443"
-              protocol: TCP
-
-    # Allow RKE2 supervisor API for node bootstrapping and management.
-    - fromEntities:
-        - host
-        - remote-node
-      toPorts:
-        - ports:
-            - port: "9345"
-              protocol: TCP
-
-    # Allow etcd client/peer ports between master nodes.
-    - fromEntities:
-        - host
-        - remote-node
-      toPorts:
-        - ports:
-            - port: "2379"
-              protocol: TCP
-            - port: "2380"
-              protocol: TCP
-
-    # Allow master node ports on WireGuard network.
-    - fromCIDR:
-        - 10.0.0.0/24
-      toPorts:
-        - ports:
-            - port: "2379" # etcd client
-              protocol: TCP
-            - port: "2380" # etcd peer
-              protocol: TCP
-            - port: "6443" # Kubernetes API server
-              protocol: TCP
-            - port: "9345" # RKE2 supervisor API
+            - port: "15017" # Webhook server
               protocol: TCP

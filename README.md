@@ -8,8 +8,8 @@ The cluster moves from `clusters/cluster-02-rke2` and `apps/` to `clusters/homel
 
 | Component | Where |
 | --- | --- |
-| Flux Operator, the FluxInstance, Cilium | `platform/`, `clusters/homelab` |
-| Gateway API, Istio, the host firewall, tenants | `apps/`, `clusters/cluster-02-rke2`, not migrated yet |
+| Flux Operator, the FluxInstance, Cilium, the host firewall | `platform/`, `policies/`, `clusters/homelab` |
+| Gateway API, Istio, tenants | `apps/`, `clusters/cluster-02-rke2`, not migrated yet |
 
 ## How it reconciles
 

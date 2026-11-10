@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - flux-instance.yaml
   - platform.yaml
+  - policies.yaml
