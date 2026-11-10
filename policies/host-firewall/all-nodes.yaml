@@ -6,10 +6,14 @@ spec:
   nodeSelector:
     matchLabels: {}
   ingress:
-    # Public: ping, HTTP(S) and WireGuard.
+    # Public: ping, ICMP errors, HTTP(S) and WireGuard. "Destination
+    # unreachable" includes "fragmentation needed", which path MTU discovery
+    # depends on.
     - icmps:
         - fields:
             - type: EchoRequest
+              family: IPv4
+            - type: DestinationUnreachable
               family: IPv4
     - toPorts:
         - ports:
