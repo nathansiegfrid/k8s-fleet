@@ -38,6 +38,17 @@ spec:
             - port: "10250"
               protocol: TCP
 
+    # Kubelet API for metrics-server, which scrapes every node's kubelet from
+    # its pod, so it arrives with the pod's identity.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            app.kubernetes.io/name: rke2-metrics-server
+      toPorts:
+        - ports:
+            - port: "10250"
+              protocol: TCP
+
     # Cilium health checks. Every node's agent probes every other node's on
     # 4240, as `remote-node`.
     - fromEntities:
