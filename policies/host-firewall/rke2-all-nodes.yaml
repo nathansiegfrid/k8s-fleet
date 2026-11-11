@@ -64,6 +64,16 @@ spec:
             - port: "4240"
               protocol: TCP
 
+    # Hubble Relay gathers every node's flows from its Hubble server.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cilium-system
+            app.kubernetes.io/name: hubble-relay
+      toPorts:
+        - ports:
+            - port: "4244"
+              protocol: TCP
+
     # Cilium VXLAN overlay between nodes.
     - fromEntities:
         - host

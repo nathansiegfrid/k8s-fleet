@@ -58,12 +58,23 @@ socketLB:
   enabled: true
   hostNamespaceOnly: true
 
+# === HUBBLE ===
+
+# Flow visibility: every flow Cilium handles, with its policy verdict, and
+# drops with their reason, the host firewall's included. The relay gathers
+# all nodes' flows for the UI. The UI has no login, so reach it through a
+# port-forward, never a route.
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+
 # === UNUSED COMPONENTS ===
 envoy:
   enabled: false
 l7Proxy: false
-hubble:
-  enabled: false
 
 # === GATEWAY API SUPPORT ===
 # Disabled: Istio is the cluster's Gateway API implementation.
