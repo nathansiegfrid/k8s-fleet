@@ -1,7 +1,7 @@
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
-  name: rke2-master-nodes
+  name: rke2-api
 spec:
   nodeSelector:
     matchLabels:
@@ -28,8 +28,7 @@ spec:
               protocol: TCP
 
     # The same ports from WireGuard peers that aren't cluster nodes yet: a
-    # node joining the cluster, or an admin's machine. etcd has its own
-    # policy, in etcd.yaml.
+    # node joining the cluster, or an admin's machine.
     - fromCIDR:
         - 10.0.0.0/24
       toPorts:
