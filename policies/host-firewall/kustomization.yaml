@@ -10,3 +10,4 @@ kind: Kustomization
 resources:
   - all-nodes.yaml
   - master-nodes.yaml
+  - etcd.yaml

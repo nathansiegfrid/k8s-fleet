@@ -1,0 +1,44 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: rke2-etcd
+spec:
+  nodeSelector:
+    matchLabels:
+      node-role.kubernetes.io/control-plane: "true"
+  ingress:
+    # etcd from this master.
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "2379" # etcd client
+              protocol: TCP
+            - port: "2380" # etcd peer
+              protocol: TCP
+
+    # From the other masters, and not from workers. fromNodes needs
+    # nodeSelectorLabels in Cilium's values: without it, this rule matches
+    # nothing, and the masters lose etcd.
+    - fromNodes:
+        - matchLabels:
+            node-role.kubernetes.io/control-plane: "true"
+      toPorts:
+        - ports:
+            - port: "2379" # etcd client
+              protocol: TCP
+            - port: "2380" # etcd peer
+              protocol: TCP
+
+    # From a master that's joining: it isn't a node yet, so only its
+    # WireGuard IP identifies it. k8s-infra keeps the masters' WireGuard IPs
+    # in 10.0.0.0/29 (10.0.0.1 to 10.0.0.7), apart from workers and admin
+    # machines.
+    - fromCIDR:
+        - 10.0.0.0/29
+      toPorts:
+        - ports:
+            - port: "2379" # etcd client
+              protocol: TCP
+            - port: "2380" # etcd peer
+              protocol: TCP

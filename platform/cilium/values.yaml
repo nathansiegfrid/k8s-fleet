@@ -38,6 +38,14 @@ hostFirewall:
 # after a change, run `kubectl -n cilium-system rollout restart ds/cilium`.
 policyAuditMode: true
 
+# Give each node an identity from its control-plane label, so host policies
+# can tell masters from workers with fromNodes: etcd is for masters only.
+# Off by default, fromNodes rules match nothing. Without the label filter,
+# every node's labels would make its identity unique; with it, the masters
+# share one identity and the workers another.
+nodeSelectorLabels: true
+nodeLabels: 'node-role\.kubernetes\.io/control-plane'
+
 # === ISTIO AMBIENT SUPPORT ===
 
 # Let Istio's CNI plugin chain after Cilium.
