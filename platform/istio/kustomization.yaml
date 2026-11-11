@@ -4,4 +4,4 @@ namespace: istio-system
 
 resources:
   - helm-repository.yaml
-  - helm-release.yaml
+  - helm-releases.yaml
