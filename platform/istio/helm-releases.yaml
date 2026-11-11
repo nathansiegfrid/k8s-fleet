@@ -1,36 +1,43 @@
+# Istio in ambient mode: four charts on the same version, installed in this
+# order. Bump them together.
+#
+# Upgrades are in place. A revisioned istiod would allow a canary upgrade,
+# but Flux can't run one: renaming the HelmRelease uninstalls the old istiod
+# in the same apply that installs the new one.
+
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: istio-base
-  namespace: istio-system
+  namespace: flux-system
 spec:
-  serviceAccountName: cluster-reconciler
+  serviceAccountName: helm-controller
   interval: 1h
   timeout: 5m
 
   chart:
     spec:
       chart: base
-      version: "1.30.7"
+      version: "1.31.4"
       sourceRef:
         kind: HelmRepository
         name: istio
+  releaseName: istio-base
+  targetNamespace: istio-system
+  storageNamespace: istio-system
   install:
     crds: Create
-    createNamespace: true
   upgrade:
     crds: CreateReplace
-  values:
-    defaultRevision: 1-30-7
 
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: istio-cni
-  namespace: istio-system
+  namespace: flux-system
 spec:
-  serviceAccountName: cluster-reconciler
+  serviceAccountName: helm-controller
   interval: 1h
   timeout: 5m
 
@@ -40,10 +47,14 @@ spec:
   chart:
     spec:
       chart: cni
-      version: "1.30.7"
+      version: "1.31.4"
       sourceRef:
         kind: HelmRepository
         name: istio
+  releaseName: istio-cni
+  targetNamespace: istio-system
+  storageNamespace: istio-system
+
   values:
     profile: ambient
 
@@ -51,10 +62,10 @@ spec:
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: istiod-1-30-7
-  namespace: istio-system
+  name: istiod
+  namespace: flux-system
 spec:
-  serviceAccountName: cluster-reconciler
+  serviceAccountName: helm-controller
   interval: 1h
   timeout: 5m
 
@@ -64,34 +75,57 @@ spec:
   chart:
     spec:
       chart: istiod
-      version: "1.30.7"
+      version: "1.31.4"
       sourceRef:
         kind: HelmRepository
         name: istio
+  releaseName: istiod
+  targetNamespace: istio-system
+  storageNamespace: istio-system
+
   values:
-    revision: 1-30-7
     profile: ambient
+
+    # istiod's ServiceAccount can read every Secret in the cluster, so it
+    # runs on the control-plane nodes, away from tenant workloads.
+    nodeSelector:
+      node-role.kubernetes.io/control-plane: "true"
+    tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+
+    # The chart requests 500m CPU and 2Gi memory by default, which doesn't
+    # fit on a control-plane node next to etcd and the API server. One fixed
+    # replica, so the autoscaler doesn't add more against the low request.
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+    autoscaleEnabled: false
+    replicaCount: 1
 
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: ztunnel
-  namespace: istio-system
+  namespace: flux-system
 spec:
-  serviceAccountName: cluster-reconciler
+  serviceAccountName: helm-controller
   interval: 1h
   timeout: 5m
 
   dependsOn:
-    - name: istiod-1-30-7
+    - name: istiod
 
   chart:
     spec:
       chart: ztunnel
-      version: "1.30.7"
+      version: "1.31.4"
       sourceRef:
         kind: HelmRepository
         name: istio
-  values:
-    revision: 1-30-7
+  releaseName: ztunnel
+  targetNamespace: istio-system
+  storageNamespace: istio-system

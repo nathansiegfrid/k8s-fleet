@@ -2,7 +2,9 @@ apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
   name: istio
-  namespace: istio-system
+  namespace: flux-system
 spec:
   interval: 1h
-  url: https://istio-release.storage.googleapis.com/charts
+  # From 1.31, Istio publishes its charts here instead of on Google Cloud
+  # Storage.
+  url: https://blob.istio.io/istio-release/charts

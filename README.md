@@ -4,12 +4,12 @@ Flux GitOps for `homelab`, a multi-cloud RKE2 cluster: its platform components, 
 
 ## Migration in progress
 
-The cluster moves from `clusters/cluster-02-rke2` and `apps/` to `clusters/homelab` and `platform/`, one component at a time. Each step moves the files it reuses; what's left of the old layout isn't reconciled by anything and isn't maintained.
+The cluster moves from `clusters/cluster-02-rke2` to `clusters/homelab` and `platform/`, one component at a time. Each step moves the files it reuses; what's left of the old layout isn't reconciled by anything and isn't maintained.
 
 | Component | Where |
 | --- | --- |
-| Flux Operator, the FluxInstance, Cilium, the host firewall, the Gateway API CRDs | `platform/`, `policies/`, `clusters/homelab` |
-| Istio, tenants | `apps/`, `clusters/cluster-02-rke2`, not migrated yet |
+| Flux Operator, the FluxInstance, Cilium, the host firewall, the Gateway API CRDs, Istio | `platform/`, `policies/`, `clusters/homelab` |
+| Tenants | `clusters/cluster-02-rke2`, not migrated yet |
 
 ## How it reconciles
 
@@ -23,7 +23,7 @@ Flux runs in multitenant mode: cross-namespace references are off, and a Kustomi
 clusters/homelab/      the cluster: its FluxInstance, and a Kustomization per component
 platform/<component>/  namespace, chart source and version, HelmRelease, values
 archive/               retired clusters, not reconciled
-apps/, clusters/cluster-02-rke2/   the old layout, until it's migrated
+clusters/cluster-02-rke2/   the old layout, until it's migrated
 ```
 
 `archive/cluster-01-k3s` is the single-node k3s cluster this repository started with in April 2026, kept as a reference for its cert-manager, Envoy Gateway, Kyverno, Linkerd, monitoring and Sealed Secrets setup.
