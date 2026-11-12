@@ -1,7 +1,11 @@
 # k8s-infra installs this component before Flux exists, from the same files:
-# the chart and version in oci-repository.yaml, the release name and
-# namespace in helm-release.yaml, and values.yaml. Flux then adopts the
-# release.
+#
+# - the chart and version in oci-repository.yaml
+# - the release name and namespace in helm-release.yaml
+# - values.yaml.
+#
+# Flux then adopts the release.
+
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:

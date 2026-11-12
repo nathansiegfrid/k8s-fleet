@@ -38,11 +38,11 @@ hostFirewall:
 # after a change, run `kubectl -n cilium-system rollout restart ds/cilium`.
 policyAuditMode: true
 
-# Give each node an identity from its control-plane label, so host policies
-# can tell masters from workers with fromNodes: etcd is for masters only.
-# Off by default, fromNodes rules match nothing. Without the label filter,
-# every node's labels would make its identity unique; with it, the masters
-# share one identity and the workers another.
+# Derive node identities from the control-plane label so host policies can
+# tell masters from workers with fromNodes. The nodeLabels filter groups nodes
+# into two shared identities, masters and workers, instead of one unique
+# identity per node.
+# When off (default), fromNodes matches nothing.
 nodeSelectorLabels: true
 nodeLabels: 'node-role\.kubernetes\.io/control-plane'
 
