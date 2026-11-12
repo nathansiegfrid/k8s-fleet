@@ -70,6 +70,17 @@ hubble:
     enabled: true
   ui:
     enabled: true
+  # Hubble's in-memory buffer holds 4,095 flows, and at about 19 flows a second
+  # it covered only 3.5 minutes. Almost all of it is ordinary allowed traffic.
+  # Configure Hubble's exporter to save AUDIT and DROPPED flows to a file on
+  # each node, up to 30 MB with rotation, deleted on reboot.
+  # To read it: `hubble observe --input-file /var/run/cilium/hubble/events.log`
+  export:
+    static:
+      enabled: true
+      allowList:
+        - '{"verdict":["DROPPED","AUDIT"]}'
+      fileMaxBackups: 2
 
 # === UNUSED COMPONENTS ===
 envoy:
