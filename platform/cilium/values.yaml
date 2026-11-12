@@ -14,12 +14,17 @@ kubeProxyReplacement: true
 k8sServiceHost: localhost
 k8sServicePort: "6443"
 
+# Roll out the agent pods automatically when cilium-config changes.
+rollOutCiliumPods: true
+
 # Keep Cilium Operator on the control-plane nodes, where tenants' pods
 # can't run: its token reads every Secret in the cluster and can rewrite
 # network policies, so a container escape on a worker mustn't reach it.
 operator:
   nodeSelector:
     node-role.kubernetes.io/control-plane: "true"
+  # Roll out the operator pods automatically when cilium-config changes.
+  rollOutPods: true
 
 # Take pod CIDRs from Kubernetes (RKE2's 10.42.0.0/16). Cilium's default
 # 10.0.0.0/8 pool overlaps the WireGuard network.
@@ -34,8 +39,7 @@ hostFirewall:
 
 # Log what the policies would drop instead of dropping it, while the host
 # firewall policies are new. It applies to every endpoint, pods included,
-# so turn it off before tenants arrive. The agents read it only at startup:
-# after a change, run `kubectl -n cilium-system rollout restart ds/cilium`.
+# so turn it off before tenants arrive.
 policyAuditMode: true
 
 # Derive node identities from the control-plane label so host policies can
