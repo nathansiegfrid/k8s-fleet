@@ -83,31 +83,34 @@ spec:
             - port: "8472"
               protocol: UDP
 
-    # Istio ambient (ztunnel) between nodes.
-    - fromEntities:
-        - host
-        - remote-node
-      toPorts:
-        - ports:
-            - port: "15008" # HBONE mTLS tunnel
-              protocol: TCP
-            - port: "15020" # Merged Prometheus telemetry
-              protocol: TCP
-            - port: "15021" # Health check
-              protocol: TCP
-            - port: "15090" # Envoy Prometheus telemetry
-              protocol: TCP
+    # Istio's rules are off while audit mode is on: Hubble's export will show
+    # whether anything, like a host-network Gateway, still needs them.
 
-    # istiod from inside the cluster.
-    - fromEntities:
-        - cluster
-      toPorts:
-        - ports:
-            - port: "15010" # XDS, plaintext gRPC
-              protocol: TCP
-            - port: "15012" # XDS, mTLS gRPC
-              protocol: TCP
-            - port: "15014" # Control-plane metrics
-              protocol: TCP
-            - port: "15017" # Webhook server
-              protocol: TCP
+    # # Istio ambient (ztunnel) between nodes.
+    # - fromEntities:
+    #     - host
+    #     - remote-node
+    #   toPorts:
+    #     - ports:
+    #         - port: "15008" # HBONE mTLS tunnel
+    #           protocol: TCP
+    #         - port: "15020" # Merged Prometheus telemetry
+    #           protocol: TCP
+    #         - port: "15021" # Health check
+    #           protocol: TCP
+    #         - port: "15090" # Envoy Prometheus telemetry
+    #           protocol: TCP
+
+    # # istiod from inside the cluster.
+    # - fromEntities:
+    #     - cluster
+    #   toPorts:
+    #     - ports:
+    #         - port: "15010" # XDS, plaintext gRPC
+    #           protocol: TCP
+    #         - port: "15012" # XDS, mTLS gRPC
+    #           protocol: TCP
+    #         - port: "15014" # Control-plane metrics
+    #           protocol: TCP
+    #         - port: "15017" # Webhook server
+    #           protocol: TCP
