@@ -24,14 +24,6 @@ spec:
             - port: "41820" # WireGuard
               protocol: UDP
 
-    # SSH only over WireGuard.
-    - fromCIDR:
-        - 10.0.0.0/24
-      toPorts:
-        - ports:
-            - port: "22"
-              protocol: TCP
-
     # Kubelet API and metrics.
     - fromEntities:
         - kube-apiserver
