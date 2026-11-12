@@ -8,7 +8,7 @@ The cluster moves from `clusters/cluster-02-rke2` to `clusters/homelab` and `pla
 
 | Component | Where |
 | --- | --- |
-| Flux Operator, the FluxInstance, Cilium, the host firewall, the Gateway API CRDs, Istio | `platform/`, `policies/`, `clusters/homelab` |
+| Flux Operator, the FluxInstance, Cilium, the host firewall, the Gateway API CRDs, Istio, the Gateway | `platform/`, `policies/`, `clusters/homelab` |
 | Tenants | `clusters/cluster-02-rke2`, not migrated yet |
 
 ## How it reconciles
