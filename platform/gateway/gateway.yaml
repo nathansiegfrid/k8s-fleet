@@ -3,6 +3,10 @@ kind: Gateway
 metadata:
   name: public
   namespace: gateway
+  annotations:
+    # external-dns points tenants' hostnames here. The Gateway's own address
+    # is its in-cluster Service; traffic reaches it on the worker's port 80.
+    external-dns.kubernetes.io/target: 156.67.221.137
 spec:
   gatewayClassName: istio
   infrastructure:

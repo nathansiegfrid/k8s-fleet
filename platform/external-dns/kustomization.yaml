@@ -1,0 +1,9 @@
+# DNS records in Cloudflare for every HTTPRoute hostname.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - helm-repository.yaml
+  - helm-release.yaml
+  # Created with `sops`, so it's never in git in plaintext.
+  - cloudflare-api-token.sops.yaml

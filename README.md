@@ -24,6 +24,16 @@ archive/               retired clusters, not reconciled
 
 Each entry in `tenants/tenants.yaml` gets a namespace, a `flux` ServiceAccount that is `admin` there, and a Flux sync of its own repository that runs as that ServiceAccount. The namespace enforces Pod Security `restricted` and is in Istio's ambient mesh. The policies in `policies/tenants` keep its pods off the masters and its Services inside the cluster; traffic from outside comes through the `public` Gateway, where tenants attach HTTPRoutes.
 
+## Secrets
+
+Secrets are encrypted with [SOPS](https://getsops.io/) and age for two keys: Nathan's, to edit them, and the cluster's, so Flux can decrypt them. `.sops.yaml` holds both public keys, and k8s-infra gives Flux the cluster's private key, the `sops-age` Secret, at bootstrap. Only Kustomizations that hold secrets get `decryption`: today, `external-dns`.
+
+Create or edit one with `sops`, which encrypts on save, so plaintext never reaches the working tree:
+
+```sh
+sops platform/external-dns/cloudflare-api-token.sops.yaml
+```
+
 ## Bootstrap
 
 Flux needs a CNI to run, so Cilium has to exist before Flux does, and the FluxInstance needs Flux Operator. k8s-infra installs Cilium and Flux Operator with Helm, then applies the FluxInstance, reading everything from this repository:

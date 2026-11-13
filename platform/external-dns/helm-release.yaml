@@ -1,0 +1,52 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: external-dns
+  namespace: flux-system
+spec:
+  serviceAccountName: helm-controller
+  interval: 1h
+  timeout: 5m
+
+  chart:
+    spec:
+      chart: external-dns
+      version: "1.23.0"
+      sourceRef:
+        kind: HelmRepository
+        name: external-dns
+  releaseName: external-dns
+  targetNamespace: external-dns
+  storageNamespace: external-dns
+
+  values:
+    provider:
+      name: cloudflare
+    env:
+      - name: CF_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: cloudflare-api-token
+            key: token
+
+    # An A record per HTTPRoute hostname. The target is the Gateway's
+    # `external-dns.kubernetes.io/target` annotation: the worker's public IP.
+    sources:
+      - gateway-httproute
+    domainFilters:
+      - siegfrid.com
+
+    # Delete records whose route is gone, but only records this cluster
+    # created: ownership is tracked in TXT records.
+    policy: sync
+    registry: txt
+    txtOwnerId: homelab
+
+    # Keep it on the masters, where tenants' pods can't run: its Cloudflare
+    # token can rewrite every record in the zone.
+    nodeSelector:
+      node-role.kubernetes.io/control-plane: "true"
+    tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
