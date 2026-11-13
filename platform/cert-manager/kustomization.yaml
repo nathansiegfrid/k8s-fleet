@@ -1,0 +1,9 @@
+# Let's Encrypt certificates, validated through Cloudflare's DNS API.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - oci-repository.yaml
+  - helm-release.yaml
+  # Created with `sops`, so it's never in git in plaintext.
+  - cloudflare-api-token.sops.yaml

@@ -26,7 +26,7 @@ Each entry in `tenants/tenants.yaml` gets a namespace, a `flux` ServiceAccount t
 
 ## Secrets
 
-Secrets are encrypted with [SOPS](https://getsops.io/) and age for two keys: Nathan's, to edit them, and the cluster's, so Flux can decrypt them. `.sops.yaml` holds both public keys, and k8s-infra gives Flux the cluster's private key, the `sops-age` Secret, at bootstrap. Only Kustomizations that hold secrets get `decryption`: today, `external-dns`.
+Secrets are encrypted with [SOPS](https://getsops.io/) and age for two keys: Nathan's, to edit them, and the cluster's, so Flux can decrypt them. `.sops.yaml` holds both public keys, and k8s-infra gives Flux the cluster's private key, the `sops-age` Secret, at bootstrap. Only Kustomizations that hold secrets get `decryption`: today, `external-dns` and `cert-manager`.
 
 Create or edit one with `sops`, which encrypts on save, so plaintext never reaches the working tree:
 

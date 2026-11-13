@@ -145,3 +145,27 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
+
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cert-manager
+  namespace: flux-system
+spec:
+  serviceAccountName: kustomize-controller
+  interval: 10m
+  timeout: 5m
+
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./platform/cert-manager
+  prune: true
+  wait: true
+
+  # The Cloudflare token is SOPS-encrypted in git.
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
