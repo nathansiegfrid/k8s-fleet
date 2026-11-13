@@ -37,11 +37,6 @@ ipam:
 hostFirewall:
   enabled: true
 
-# Log what the policies would drop instead of dropping it, while the host
-# firewall policies are new. It applies to every endpoint, pods included,
-# so turn it off before tenants arrive.
-policyAuditMode: true
-
 # Derive node identities from the control-plane label so host policies can
 # tell masters from workers with fromNodes. The nodeLabels filter groups nodes
 # into two shared identities, masters and workers, instead of one unique
