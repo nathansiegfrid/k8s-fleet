@@ -6,14 +6,19 @@ spec:
   nodeSelector:
     matchLabels: {}
   ingress:
-    # Public: ping, ICMP errors, HTTP(S) and WireGuard. "Destination
-    # unreachable" includes "fragmentation needed", which path MTU discovery
-    # depends on.
+    # Public: ping, ICMP errors, HTTP(S) and WireGuard.
     - icmps:
         - fields:
             - type: EchoRequest
               family: IPv4
+            # Allows "fragmentation needed", which path MTU discovery needs.
             - type: DestinationUnreachable
+              family: IPv4
+            # Allows ICMP Time Exceeded replies for traceroute run from a node.
+            # The routers' replies arrive as world -> host, so without this rule
+            # they're dropped, because Cilium doesn't treat them as part of the
+            # outgoing probe's connection as it does for TCP and UDP replies.
+            - type: TimeExceeded
               family: IPv4
     - toPorts:
         - ports:
