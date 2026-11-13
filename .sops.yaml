@@ -1,0 +1,14 @@
+# Files matching *.sops.yaml are encrypted for two age recipients (either key can decrypt):
+#
+#   1. Admin workstation: lets the admin edit secrets locally with `sops`.
+#   2. Cluster: its private key is in the `sops-age` Secret, which Flux uses to decrypt on apply.
+#
+# After changing recipients, run `sops updatekeys <file>` on existing secrets.
+
+creation_rules:
+  - path_regex: \.sops\.ya?ml$
+    # Encrypt only the Secret's data.
+    encrypted_regex: ^(data|stringData)$
+    age: >-
+      age14ffhzy8v4ed9kr0fertclh3tvevppa7ygxl5gkep8h7w8ys8ny3scnsqsf,
+      age1t3f664zrvst5vgwvum90pdpllw85dc9h56v7yl6dg443aaw7ng4s7uhgd0
