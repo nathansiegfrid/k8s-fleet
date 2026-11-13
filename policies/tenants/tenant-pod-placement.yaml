@@ -1,0 +1,38 @@
+# Keeps tenant pods off the masters, which run the cluster-wide controllers.
+# Checked on creation only: a scheduled pod carries the scheduler's nodeName
+# on every later update, and a toleration added later doesn't move a pod.
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: tenant-pod-placement
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE]
+        resources: [pods]
+  validations:
+    - expression: "!has(object.spec.nodeName) || object.spec.nodeName == ''"
+      message: Tenant pods can't choose their node with spec.nodeName.
+    # A toleration without a key tolerates every taint.
+    - expression: >-
+        !has(object.spec.tolerations) ||
+        object.spec.tolerations.all(t, has(t.key) && t.key != '' &&
+        t.key != 'node-role.kubernetes.io/control-plane')
+      message: Tenant pods can't tolerate the control-plane taint or all taints.
+
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: tenant-pod-placement
+spec:
+  policyName: tenant-pod-placement
+  validationActions: [Deny]
+  matchResources:
+    namespaceSelector:
+      matchExpressions:
+        - key: tenant
+          operator: Exists

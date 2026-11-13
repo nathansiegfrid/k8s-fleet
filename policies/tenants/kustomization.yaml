@@ -1,0 +1,7 @@
+# Admission policies for tenant namespaces, the ones labeled `tenant`. They
+# cover what Pod Security doesn't: where pods run and how Services expose them.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - tenant-pod-placement.yaml
+  - tenant-service-exposure.yaml

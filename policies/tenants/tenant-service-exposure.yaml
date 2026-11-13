@@ -1,0 +1,37 @@
+# Tenant Services stay inside the cluster: traffic from outside comes through
+# the shared Gateway. External IPs would let a tenant take a node's address
+# and port, even the Gateway's (CVE-2020-8554).
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: tenant-service-exposure
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [services]
+  validations:
+    - expression: >-
+        !has(object.spec.externalIPs) || size(object.spec.externalIPs) == 0
+      message: Tenant Services can't have external IPs.
+    - expression: >-
+        !has(object.spec.type) ||
+        !(object.spec.type in ['NodePort', 'LoadBalancer'])
+      message: Tenant Services can't be NodePort or LoadBalancer.
+
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: tenant-service-exposure
+spec:
+  policyName: tenant-service-exposure
+  validationActions: [Deny]
+  matchResources:
+    namespaceSelector:
+      matchExpressions:
+        - key: tenant
+          operator: Exists
