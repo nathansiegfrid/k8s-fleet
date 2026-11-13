@@ -5,7 +5,7 @@ metadata:
   namespace: gateway
   annotations:
     # external-dns points tenants' hostnames here. The Gateway's own address
-    # is its in-cluster Service; traffic reaches it on the worker's port 80.
+    # is its in-cluster Service; traffic reaches it on the worker's ports.
     external-dns.kubernetes.io/target: 156.67.221.137
 spec:
   gatewayClassName: istio
@@ -15,10 +15,22 @@ spec:
       kind: ConfigMap
       name: public-gateway
   listeners:
+    # Only the platform's redirect to HTTPS attaches here.
     - name: http
       protocol: HTTP
       port: 80
-      # Routes attach from any namespace, for any hostname. Restrict this
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.siegfrid.com"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: public-tls
+      # Routes attach from any namespace, for any subdomain. Restrict this
       # before a second tenant, who could claim the first one's hostname.
       allowedRoutes:
         namespaces:
@@ -32,13 +44,13 @@ metadata:
   name: public-gateway
   namespace: gateway
 data:
-  # There's no load balancer: traffic reaches the pod on its node's port 80.
+  # There's no load balancer: traffic reaches the pod on its node's ports.
   service: |
     spec:
       type: ClusterIP
-  # hostPort, not hostNetwork: Envoy can bind port 80 as non-root only in its
-  # own network namespace. The old pod has to free the port before the new one
-  # starts.
+  # hostPort, not hostNetwork: Envoy can bind ports 80 and 443 as non-root only
+  # in its own network namespace. The old pod has to free the ports before the
+  # new one starts.
   deployment: |
     spec:
       strategy:
@@ -52,4 +64,7 @@ data:
               ports:
                 - containerPort: 80
                   hostPort: 80
+                  protocol: TCP
+                - containerPort: 443
+                  hostPort: 443
                   protocol: TCP

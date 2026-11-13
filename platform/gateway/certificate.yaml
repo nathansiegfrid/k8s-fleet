@@ -1,0 +1,14 @@
+# One wildcard certificate for every tenant hostname, so tenants only
+# attach routes. Only DNS-01 can issue wildcards.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: public-tls
+  namespace: gateway
+spec:
+  secretName: public-tls
+  dnsNames:
+    - "*.siegfrid.com"
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt

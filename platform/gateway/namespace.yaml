@@ -5,8 +5,8 @@ metadata:
   annotations:
     kustomize.toolkit.fluxcd.io/prune: disabled
   labels:
-    # The Gateway takes the node's port 80 with hostPort, which only
-    # privileged allows.
+    # The Gateway takes the node's ports 80 and 443 with hostPort, which
+    # only privileged allows.
     pod-security.kubernetes.io/enforce: privileged
     pod-security.kubernetes.io/warn: privileged
     pod-security.kubernetes.io/audit: privileged

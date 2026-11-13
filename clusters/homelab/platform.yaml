@@ -107,8 +107,9 @@ spec:
   timeout: 5m
 
   dependsOn:
-    # istiod deploys the Gateway's pod.
+    # istiod deploys the Gateway's pod, and cert-manager issues its certificate.
     - name: istio
+    - name: cert-manager
 
   sourceRef:
     kind: GitRepository

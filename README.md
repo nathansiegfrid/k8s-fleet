@@ -22,7 +22,7 @@ archive/               retired clusters, not reconciled
 
 ## Tenants
 
-Each entry in `tenants/tenants.yaml` gets a namespace, a `flux` ServiceAccount that is `admin` there, and a Flux sync of its own repository that runs as that ServiceAccount. The namespace enforces Pod Security `restricted` and is in Istio's ambient mesh. The policies in `policies/tenants` keep its pods off the masters and its Services inside the cluster; traffic from outside comes through the `public` Gateway, where tenants attach HTTPRoutes.
+Each entry in `tenants/tenants.yaml` gets a namespace, a `flux` ServiceAccount that is `admin` there, and a Flux sync of its own repository that runs as that ServiceAccount. The namespace enforces Pod Security `restricted` and is in Istio's ambient mesh. The policies in `policies/tenants` keep its pods off the masters and its Services inside the cluster; traffic from outside comes through the `public` Gateway. Tenants attach HTTPRoutes to its `https` listener, which serves a wildcard `*.siegfrid.com` certificate from Let's Encrypt; plain HTTP redirects to HTTPS.
 
 ## Secrets
 
