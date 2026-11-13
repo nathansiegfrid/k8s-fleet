@@ -2,18 +2,9 @@
 
 Flux GitOps for `homelab`, a multi-cloud RKE2 cluster: its platform components, cluster-wide policies and tenants. [k8s-infra](https://github.com/nathansiegfrid/k8s-infra) builds the nodes, then bootstraps Flux from the files in this repository.
 
-## Migration in progress
-
-The cluster moves from `clusters/cluster-02-rke2` to `clusters/homelab` and `platform/`, one component at a time. Each step moves the files it reuses; what's left of the old layout isn't reconciled by anything and isn't maintained.
-
-| Component | Where |
-| --- | --- |
-| Flux Operator, the FluxInstance, Cilium, the host firewall, the Gateway API CRDs, Istio, the Gateway | `platform/`, `policies/`, `clusters/homelab` |
-| Tenants | `clusters/cluster-02-rke2`, not migrated yet |
-
 ## How it reconciles
 
-The FluxInstance syncs `clusters/homelab` from `main`. Its `platform.yaml` declares one Flux Kustomization per component in `platform/`.
+The FluxInstance syncs `clusters/homelab` from `main`. Its `platform.yaml`, `policies.yaml` and `tenants.yaml` declare one Flux Kustomization per directory in `platform/`, `policies/` and `tenants/`.
 
 Flux runs in multitenant mode: cross-namespace references are off, and a Kustomization or HelmRelease that doesn't name a ServiceAccount impersonates `<namespace>:flux`. The platform's Kustomizations run as `kustomize-controller` and its HelmReleases as `helm-controller`, both cluster-admin.
 
@@ -22,11 +13,16 @@ Flux runs in multitenant mode: cross-namespace references are off, and a Kustomi
 ```
 clusters/homelab/      the cluster: its FluxInstance, and a Kustomization per component
 platform/<component>/  namespace, chart source and version, HelmRelease, values
+policies/<policy>/     cluster-wide policies: the host firewall, tenant admission
+tenants/               the tenants ResourceSet, one input per tenant
 archive/               retired clusters, not reconciled
-clusters/cluster-02-rke2/   the old layout, until it's migrated
 ```
 
 `archive/cluster-01-k3s` is the single-node k3s cluster this repository started with in April 2026, kept as a reference for its cert-manager, Envoy Gateway, Kyverno, Linkerd, monitoring and Sealed Secrets setup.
+
+## Tenants
+
+Each entry in `tenants/tenants.yaml` gets a namespace, a `flux` ServiceAccount that is `admin` there, and a Flux sync of its own repository that runs as that ServiceAccount. The namespace enforces Pod Security `restricted` and is in Istio's ambient mesh. The policies in `policies/tenants` keep its pods off the masters and its Services inside the cluster; traffic from outside comes through the `public` Gateway, where tenants attach HTTPRoutes.
 
 ## Bootstrap
 

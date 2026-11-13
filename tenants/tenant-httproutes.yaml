@@ -1,0 +1,12 @@
+# Lets tenants attach HTTPRoutes to the shared Gateway: `admin` has no
+# Gateway API permissions of its own.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: tenant-httproutes
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+rules:
+  - apiGroups: [gateway.networking.k8s.io]
+    resources: [httproutes]
+    verbs: [get, list, watch, create, update, patch, delete, deletecollection]

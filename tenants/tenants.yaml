@@ -1,27 +1,80 @@
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
+# One entry in `inputs` per tenant. Flux Operator generates each tenant's
+# namespace, Flux identity and sync from the template below.
+apiVersion: fluxcd.controlplane.io/v1
+kind: ResourceSet
 metadata:
-  name: main
-  namespace: _
+  name: tenants
+  namespace: flux-system
 spec:
-  interval: 5m
-  url: https://github.com/nathansiegfrid/k8s-apps
-  ref:
-    branch: main
+  inputs:
+    - tenant: tenant-01
+      repository: https://github.com/nathansiegfrid/k8s-apps
+      branch: main
 
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: main
-  namespace: _
-spec:
-  serviceAccountName: tenant-reconciler
-  targetNamespace: _
-  interval: 10m
-  prune: true
+  resources:
+    # Removing a tenant from `inputs` keeps its namespace and everything in
+    # it. Deleting the namespace is a separate, deliberate step.
+    - apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: << inputs.tenant >>
+        annotations:
+          fluxcd.controlplane.io/prune: disabled
+        labels:
+          # The tenant admission policies apply where this label is set.
+          tenant: << inputs.tenant >>
+          istio.io/dataplane-mode: ambient
+          pod-security.kubernetes.io/enforce: restricted
+          pod-security.kubernetes.io/audit: restricted
+          pod-security.kubernetes.io/warn: restricted
 
-  sourceRef:
-    kind: GitRepository
-    name: main
-  path: .
+    - apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: flux
+        namespace: << inputs.tenant >>
+
+    # `admin` in the tenant's namespace only: workloads, Services, Roles and
+    # Flux objects, but not its ResourceQuota, LimitRange or Namespace.
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: flux
+        namespace: << inputs.tenant >>
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: admin
+      subjects:
+        - kind: ServiceAccount
+          name: flux
+          namespace: << inputs.tenant >>
+
+    - apiVersion: source.toolkit.fluxcd.io/v1
+      kind: GitRepository
+      metadata:
+        name: apps
+        namespace: << inputs.tenant >>
+      spec:
+        interval: 5m
+        url: << inputs.repository >>
+        ref:
+          branch: << inputs.branch >>
+
+    - apiVersion: kustomize.toolkit.fluxcd.io/v1
+      kind: Kustomization
+      metadata:
+        name: apps
+        namespace: << inputs.tenant >>
+      spec:
+        serviceAccountName: flux
+        targetNamespace: << inputs.tenant >>
+        interval: 10m
+        sourceRef:
+          kind: GitRepository
+          name: apps
+        path: ./
+        prune: true
+        # Leave the tenant's workloads running if this Kustomization is
+        # deleted, e.g. when the tenant is removed from `inputs`.
+        deletionPolicy: Orphan
