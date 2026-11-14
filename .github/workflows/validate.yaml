@@ -9,7 +9,7 @@ jobs:
   manifests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       # kubectl, which builds the kustomizations, is preinstalled on the runner.
       - name: Install kubeconform and the flux-operator CLI
