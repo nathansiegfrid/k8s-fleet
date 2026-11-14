@@ -5,4 +5,5 @@ resources:
   - cluster-issuer.yaml
   - certificate.yaml
   - public-gateway.yaml
+  - private-gateway.yaml
   - https-redirect.yaml

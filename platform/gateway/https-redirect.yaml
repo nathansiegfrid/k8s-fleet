@@ -8,6 +8,8 @@ spec:
   parentRefs:
     - name: public-gateway
       sectionName: http
+    - name: private-gateway
+      sectionName: http
   rules:
     - filters:
         - type: RequestRedirect

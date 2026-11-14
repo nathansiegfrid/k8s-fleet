@@ -49,8 +49,8 @@ data:
     spec:
       type: ClusterIP
   # hostPort, not hostNetwork: Envoy can bind ports 80 and 443 as non-root only
-  # in its own network namespace. The old pod has to free the ports before the
-  # new one starts.
+  # in its own network namespace. On the public address only, so the private
+  # Gateway can hold them on 10.0.0.11; the old pod has to free them first.
   deployment: |
     spec:
       strategy:
@@ -64,7 +64,9 @@ data:
               ports:
                 - containerPort: 80
                   hostPort: 80
+                  hostIP: 156.67.221.137
                   protocol: TCP
                 - containerPort: 443
                   hostPort: 443
+                  hostIP: 156.67.221.137
                   protocol: TCP

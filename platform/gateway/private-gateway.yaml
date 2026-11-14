@@ -1,0 +1,103 @@
+# A Gateway reachable only over the VPN, for platform UIs such as Grafana.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: private-gateway
+  namespace: gateway
+  annotations:
+    # external-dns points its hostnames at the worker's WireGuard address.
+    external-dns.kubernetes.io/target: 10.0.0.11
+spec:
+  gatewayClassName: istio
+  infrastructure:
+    parametersRef:
+      group: ""
+      kind: ConfigMap
+      name: private-gateway
+  listeners:
+    # Only the platform's redirect to HTTPS attaches here.
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.siegfrid.com"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: public-tls
+      # Platform namespaces only: tenants publish through the public Gateway.
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values: [monitoring]
+
+---
+# Istio overlays these on the Service and Deployment it generates.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: private-gateway
+  namespace: gateway
+data:
+  service: |
+    spec:
+      type: ClusterIP
+  # Ports 80 and 443 on the WireGuard address only. The public Gateway holds
+  # them on the public address, and the old pod has to free them first.
+  deployment: |
+    spec:
+      strategy:
+        rollingUpdate:
+          maxSurge: 0
+          maxUnavailable: 1
+      template:
+        spec:
+          containers:
+            - name: istio-proxy
+              ports:
+                - containerPort: 80
+                  hostPort: 80
+                  hostIP: 10.0.0.11
+                  protocol: TCP
+                - containerPort: 443
+                  hostPort: 443
+                  hostIP: 10.0.0.11
+                  protocol: TCP
+
+---
+# hostPort traffic goes straight to the pod, so the host firewall doesn't
+# see it: this keeps the Gateway to WireGuard clients, whatever reaches it.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: private-gateway
+  namespace: gateway
+spec:
+  endpointSelector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-name: private-gateway
+  ingress:
+    - fromCIDR:
+        - 10.0.0.0/24
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+            - port: "443"
+              protocol: TCP
+    # The kubelet's readiness probe on Envoy's status port.
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "15021"
+              protocol: TCP
