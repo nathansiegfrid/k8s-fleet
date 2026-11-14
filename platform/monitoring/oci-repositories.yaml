@@ -43,3 +43,20 @@ spec:
   layerSelector:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
+
+---
+# The grafana chart moved from grafana/helm-charts to grafana-community on
+# 2026-01-30.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: grafana
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: oci://ghcr.io/grafana-community/helm-charts/grafana
+  ref:
+    tag: "14.4.1"
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy

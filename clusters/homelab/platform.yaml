@@ -211,3 +211,9 @@ spec:
   path: ./platform/monitoring
   prune: true
   wait: true
+
+  # Grafana's admin Secret is SOPS-encrypted in git.
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age

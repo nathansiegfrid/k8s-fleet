@@ -1,0 +1,71 @@
+# Grafana, reading Prometheus. Reached at grafana.siegfrid.com through the
+# private Gateway, so only over the VPN.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana
+  namespace: flux-system
+spec:
+  serviceAccountName: helm-controller
+  interval: 1h
+  timeout: 5m
+
+  chartRef:
+    kind: OCIRepository
+    name: grafana
+  releaseName: grafana
+  targetNamespace: monitoring
+  storageNamespace: monitoring
+
+  values:
+    # The admin login, from grafana-admin.sops.yaml.
+    admin:
+      existingSecret: grafana-admin
+    # Grafana encrypts the credentials it stores with this key, and its
+    # built-in default is public.
+    envValueFrom:
+      GF_SECURITY_SECRET_KEY:
+        secretKeyRef:
+          name: grafana-admin
+          key: secret-key
+
+    grafana.ini:
+      server:
+        root_url: https://grafana.siegfrid.com
+
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+          - name: Prometheus
+            type: prometheus
+            uid: prometheus
+            url: http://prometheus-server.monitoring.svc
+            access: proxy
+            isDefault: true
+
+    # Users, preferences and anything made in the UI live in its SQLite
+    # database, on a local-path volume, with one pod at a time using it.
+    persistence:
+      enabled: true
+      size: 1Gi
+    deploymentStrategy:
+      type: Recreate
+    # local-path directories are writable by any user, so no root init
+    # container to change their owner.
+    initChownData:
+      enabled: false
+
+    # No sidecars, so it needs no API access: no token and no role.
+    automountServiceAccountToken: false
+    rbac:
+      create: false
+    testFramework:
+      enabled: false
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 512Mi
