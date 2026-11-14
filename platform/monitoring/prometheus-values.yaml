@@ -81,6 +81,13 @@ serverFiles:
               - __meta_kubernetes_endpointslice_port_name
             regex: kubernetes;https
             action: keep
+        # Drop the buckets of histograms nothing reads yet, about 54,000 series.
+        # Their _sum and _count stay, so averages still work; only percentiles
+        # go. apiserver_request_duration_seconds keeps its buckets for latency.
+        metric_relabel_configs:
+          - source_labels: [__name__]
+            regex: (etcd_request_duration_seconds|apiserver_request_sli_duration_seconds|apiserver_request_body_size_bytes|apiserver_watch_list_duration_seconds|apiserver_watch_cache_read_wait_seconds|apiserver_response_sizes|apiserver_watch_events_sizes)_bucket
+            action: drop
 
       # Each kubelet, found as a node at its InternalIP and kubelet port.
       # Its serving certificate is from the cluster's CA, for that address.
