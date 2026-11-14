@@ -6,7 +6,7 @@ metadata:
   namespace: gateway
 spec:
   parentRefs:
-    - name: public
+    - name: public-gateway
       sectionName: http
   rules:
     - filters:
