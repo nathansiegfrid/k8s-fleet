@@ -39,15 +39,30 @@ spec:
             - port: "10250"
               protocol: TCP
 
-    # Kubelet API for metrics-server, which scrapes every node's kubelet from
-    # its pod, so it arrives with the pod's identity.
+    # Kubelet API for metrics-server and Prometheus, which scrape every node's
+    # kubelet from their pods, so they arrive with their pods' identities.
     - fromEndpoints:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: kube-system
             app.kubernetes.io/name: rke2-metrics-server
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: monitoring
+            app.kubernetes.io/name: prometheus
+            app.kubernetes.io/component: server
       toPorts:
         - ports:
             - port: "10250"
+              protocol: TCP
+
+    # node-exporter, scraped by Prometheus from its pod.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: monitoring
+            app.kubernetes.io/name: prometheus
+            app.kubernetes.io/component: server
+      toPorts:
+        - ports:
+            - port: "9100"
               protocol: TCP
 
     # Cilium health checks. Every node's agent probes every other node's on

@@ -1,0 +1,23 @@
+# The Prometheus server, with its scrape jobs in prometheus-values.yaml. Only
+# the server: the exporters are separate releases; Alertmanager comes later.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: prometheus
+  namespace: flux-system
+spec:
+  serviceAccountName: helm-controller
+  interval: 1h
+  timeout: 5m
+
+  chartRef:
+    kind: OCIRepository
+    name: prometheus
+  releaseName: prometheus
+  targetNamespace: monitoring
+  storageNamespace: monitoring
+
+  valuesFrom:
+    - kind: ConfigMap
+      name: prometheus-values
+      valuesKey: prometheus-values.yaml

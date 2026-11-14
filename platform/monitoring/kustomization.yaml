@@ -1,5 +1,5 @@
-# The monitoring stack, one HelmRelease per part: the exporters now,
-# Prometheus and Grafana next.
+# The monitoring stack, one HelmRelease per part: the exporters and
+# Prometheus now, Grafana next.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -7,3 +7,17 @@ resources:
   - oci-repositories.yaml
   - node-exporter.yaml
   - kube-state-metrics.yaml
+  - prometheus-rbac.yaml
+  - prometheus.yaml
+
+configMapGenerator:
+  - name: prometheus-values
+    namespace: flux-system
+    files:
+      - prometheus-values.yaml
+    options:
+      # HelmRelease.valuesFrom can't follow kustomize's hash suffix.
+      disableNameSuffixHash: true
+      labels:
+        # Upgrade the release as soon as prometheus-values.yaml changes.
+        reconcile.fluxcd.io/watch: Enabled

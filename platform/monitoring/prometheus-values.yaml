@@ -1,0 +1,129 @@
+# Values for the prometheus chart, read by prometheus.yaml through a ConfigMap
+# so that `null` survives: the API server drops it from a HelmRelease's values.
+alertmanager:
+  enabled: false
+kube-state-metrics:
+  enabled: false
+prometheus-node-exporter:
+  enabled: false
+prometheus-pushgateway:
+  enabled: false
+
+server:
+  # Bound to the ClusterRole in prometheus-rbac.yaml instead of the chart's.
+  useExistingClusterRoleName: prometheus-server
+
+  global:
+    scrape_interval: 30s
+    evaluation_interval: 30s
+
+  # local-path doesn't enforce a volume's size, so retentionSize is what
+  # keeps the data under it.
+  retention: 15d
+  retentionSize: 8GB
+  persistentVolume:
+    size: 10Gi
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
+
+  securityContext:
+    runAsUser: 65534
+    runAsGroup: 65534
+    runAsNonRoot: true
+    fsGroup: 65534
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop: [ALL]
+
+# The sidecar that tells Prometheus to reload when this config changes.
+configmapReload:
+  prometheus:
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop: [ALL]
+
+# The chart adds its own default jobs before ours; null removes them, so
+# this file holds every job Prometheus runs.
+scrapeConfigs: null
+serverFiles:
+  prometheus.yml:
+    scrape_configs:
+      - job_name: prometheus
+        static_configs:
+          - targets: [localhost:9090]
+
+      # The API server on each master, found through the EndpointSlices
+      # of the default/kubernetes Service.
+      - job_name: apiserver
+        scheme: https
+        authorization:
+          credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        kubernetes_sd_configs:
+          - role: endpointslice
+            namespaces:
+              names: [default]
+        relabel_configs:
+          - source_labels:
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_endpointslice_port_name
+            regex: kubernetes;https
+            action: keep
+
+      # Each kubelet, found as a node at its InternalIP and kubelet port.
+      # Its serving certificate is from the cluster's CA, for that address.
+      - job_name: kubelet
+        scheme: https
+        authorization:
+          credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        kubernetes_sd_configs:
+          - role: node
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_node_name]
+            target_label: node
+
+      # The same kubelets on another path: cAdvisor's usage per container.
+      - job_name: cadvisor
+        scheme: https
+        metrics_path: /metrics/cadvisor
+        authorization:
+          credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        kubernetes_sd_configs:
+          - role: node
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_node_name]
+            target_label: node
+
+      # node-exporter at each node's address. The node role gives the
+      # kubelet's port, so the address is rewritten to 9100.
+      - job_name: node-exporter
+        kubernetes_sd_configs:
+          - role: node
+        relabel_configs:
+          - source_labels: [__address__]
+            regex: (.+):\d+
+            replacement: ${1}:9100
+            target_label: __address__
+          - source_labels: [__meta_kubernetes_node_name]
+            target_label: node
+
+      # One replica behind a Service, so a fixed target is enough.
+      - job_name: kube-state-metrics
+        static_configs:
+          - targets: [kube-state-metrics.monitoring.svc:8080]
