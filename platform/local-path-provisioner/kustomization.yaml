@@ -1,0 +1,7 @@
+# Persistent volumes as directories on the node that runs the pod.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - git-repository.yaml
+  - helm-release.yaml
