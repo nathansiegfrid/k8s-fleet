@@ -9,6 +9,7 @@ resources:
   - kube-state-metrics.yaml
   - prometheus-rbac.yaml
   - prometheus.yaml
+  - network-policies.yaml
 
 configMapGenerator:
   - name: prometheus-values
