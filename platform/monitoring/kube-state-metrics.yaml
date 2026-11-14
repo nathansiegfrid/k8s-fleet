@@ -1,0 +1,54 @@
+# Metrics about Kubernetes objects: what's desired, what's ready, what's
+# restarting. It lists and watches every object of the kinds it collects.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-state-metrics
+  namespace: flux-system
+spec:
+  serviceAccountName: helm-controller
+  interval: 1h
+  timeout: 5m
+
+  chartRef:
+    kind: OCIRepository
+    name: kube-state-metrics
+  releaseName: kube-state-metrics
+  targetNamespace: monitoring
+  storageNamespace: monitoring
+
+  values:
+    # Exclude configmaps and secrets from the chart's list.
+    # Listing those resources also returns their contents,
+    # so the role shouldn't get them either.
+    collectors:
+      - certificatesigningrequests
+      - cronjobs
+      - daemonsets
+      - deployments
+      - endpointslices
+      - horizontalpodautoscalers
+      - ingresses
+      - jobs
+      - leases
+      - limitranges
+      - mutatingwebhookconfigurations
+      - namespaces
+      - networkpolicies
+      - nodes
+      - persistentvolumeclaims
+      - persistentvolumes
+      - poddisruptionbudgets
+      - pods
+      - replicasets
+      - replicationcontrollers
+      - resourcequotas
+      - services
+      - statefulsets
+      - storageclasses
+      - validatingwebhookconfigurations
+      - volumeattachments
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi

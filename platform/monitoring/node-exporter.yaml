@@ -1,0 +1,28 @@
+# Each node's own metrics: CPU, memory, disks, network. A DaemonSet on every
+# node, masters included: the chart tolerates every NoSchedule taint.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: node-exporter
+  namespace: flux-system
+spec:
+  serviceAccountName: helm-controller
+  interval: 1h
+  timeout: 5m
+
+  chartRef:
+    kind: OCIRepository
+    name: node-exporter
+  releaseName: node-exporter
+  targetNamespace: node-exporter
+  storageNamespace: node-exporter
+
+  values:
+    # Listen on the node's InternalIP, its WireGuard address, instead of every
+    # address the host has, the public ones included.
+    service:
+      listenOnAllInterfaces: false
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
