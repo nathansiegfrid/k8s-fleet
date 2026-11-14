@@ -26,3 +26,12 @@ configMapGenerator:
       labels:
         # Upgrade the release as soon as prometheus-values.yaml changes.
         reconcile.fluxcd.io/watch: Enabled
+
+  # Every dashboard, one key per file. Grafana mounts it by this name, and
+  # sees an edit within about a minute, without a restart.
+  - name: grafana-dashboards
+    namespace: monitoring
+    files:
+      - dashboards/nodes.json
+    options:
+      disableNameSuffixHash: true

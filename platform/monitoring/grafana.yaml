@@ -44,6 +44,22 @@ spec:
             access: proxy
             isDefault: true
 
+    # Dashboards are the JSON files in dashboards/, which Grafana provisions
+    # itself from a mounted ConfigMap. Git is the source: Grafana won't save
+    # changes to one, and offers its JSON to copy instead.
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: homelab
+            type: file
+            allowUiUpdates: false
+            disableDeletion: true
+            options:
+              path: /var/lib/grafana/dashboards/homelab
+    dashboardsConfigMaps:
+      homelab: grafana-dashboards
+
     # Users, preferences and anything made in the UI live in its SQLite
     # database, on a local-path volume, with one pod at a time using it.
     persistence:
