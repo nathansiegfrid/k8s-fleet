@@ -1,0 +1,40 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "ignorePaths": [
+    "archive/**"
+  ],
+  "flux": {
+    "managerFilePatterns": [
+      "/^(clusters|platform|policies|tenants)/.+\\.ya?ml$/"
+    ]
+  },
+  "packageRules": [
+    {
+      "description": "Istio's four charts must stay on one version.",
+      "matchDatasources": [
+        "helm"
+      ],
+      "matchPackageNames": [
+        "base",
+        "cni",
+        "istiod",
+        "ztunnel"
+      ],
+      "groupName": "istio"
+    },
+    {
+      "description": "Gateway API stays at the version Istio is built against, so its pull request waits for approval in the Dependency Dashboard.",
+      "matchDatasources": [
+        "git-tags",
+        "github-tags"
+      ],
+      "matchPackageNames": [
+        "/kubernetes-sigs/gateway-api/"
+      ],
+      "dependencyDashboardApproval": true
+    }
+  ]
+}

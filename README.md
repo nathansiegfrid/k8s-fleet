@@ -48,6 +48,10 @@ Flux needs a CNI to run, so Cilium has to exist before Flux does, and the FluxIn
 
 Flux then adopts both Helm releases, and from there on manages them, the FluxInstance and itself. An upgrade is a change in this repository only, and the next cluster bootstraps at the same versions.
 
+## Upgrades
+
+[Renovate](https://docs.renovatebot.com/) opens a pull request for each new chart version, with Istio's four charts grouped into one. A new Gateway API release waits for approval in the Dependency Dashboard, since its version has to be the one Istio is built against. Cilium and Flux Operator upgrades need no change in k8s-infra: the bootstrap reads the same files.
+
 ## Validating
 
 ```sh
