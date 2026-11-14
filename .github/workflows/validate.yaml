@@ -1,0 +1,23 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # kubectl, which builds the kustomizations, is preinstalled on the runner.
+      - name: Install kubeconform and the flux-operator CLI
+        run: |
+          curl -sfL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz \
+            | sudo tar xz -C /usr/local/bin kubeconform
+          curl -sfL https://github.com/controlplaneio-fluxcd/flux-operator/releases/download/v0.62.1/flux-operator_0.62.1_linux_amd64.tar.gz \
+            | sudo tar xz -C /usr/local/bin flux-operator
+
+      - name: Validate manifests
+        run: ./scripts/validate.sh

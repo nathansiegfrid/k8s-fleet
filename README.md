@@ -47,3 +47,11 @@ Flux needs a CNI to run, so Cilium has to exist before Flux does, and the FluxIn
 | `clusters/homelab/flux-instance.yaml` | The FluxInstance, applied as is |
 
 Flux then adopts both Helm releases, and from there on manages them, the FluxInstance and itself. An upgrade is a change in this repository only, and the next cluster bootstraps at the same versions.
+
+## Validating
+
+```sh
+./scripts/validate.sh
+```
+
+It checks that every `*.sops.yaml` is encrypted, builds every kustomization, renders the tenants ResourceSet, and validates all of it against the Kubernetes and CRD schemas. It needs kustomize (or kubectl), [kubeconform](https://github.com/yannh/kubeconform) and the [flux-operator CLI](https://github.com/controlplaneio-fluxcd/flux-operator/releases). CI runs it on every push to `main` and on pull requests.
