@@ -63,9 +63,10 @@ spec:
     testFramework:
       enabled: false
 
+    # Grafana 13 used 432Mi idle, right after starting.
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
-      limits:
         memory: 512Mi
+      limits:
+        memory: 1Gi
