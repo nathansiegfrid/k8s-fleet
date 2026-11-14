@@ -1,5 +1,4 @@
 # Separate policy for SSH so a bad edit on another won't lock us out.
-
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:

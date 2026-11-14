@@ -5,6 +5,7 @@
 # but Flux can't run one: renaming the HelmRelease uninstalls the old istiod
 # in the same apply that installs the new one.
 
+---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
