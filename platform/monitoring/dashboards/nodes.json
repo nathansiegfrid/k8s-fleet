@@ -38,7 +38,7 @@
       "id": 1,
       "type": "timeseries",
       "title": "CPU usage per node",
-      "description": "Average busy fraction across all cores, per node: 1 minus the idle fraction. Hidden unless up was 1 for the whole rate window, since rate() over a part-empty window is wrong.",
+      "description": "Average busy fraction across all cores, per node: 1 minus the idle fraction. Hidden unless up was 1 for the whole rate window and the scrape before it, since rate() over a part-empty window is wrong.",
       "gridPos": { "h": 9, "w": 24, "x": 0, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
@@ -63,7 +63,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "(1 - avg by (node) (rate(node_cpu_seconds_total{mode=\"idle\", node=~\"$node\"}[$__rate_interval]))) and on (node) (min_over_time(up{job=\"node-exporter\"}[$__rate_interval]) == 1)",
+          "expr": "(1 - avg by (node) (rate(node_cpu_seconds_total{mode=\"idle\", node=~\"$node\"}[$__rate_interval]))) and on (node) (min_over_time(up{job=\"node-exporter\"}[$__rate_interval]) == 1 and up{job=\"node-exporter\"} offset $__rate_interval == 1)",
           "legendFormat": "{{node}}"
         }
       ]
