@@ -59,3 +59,11 @@ Flux then adopts both Helm releases, and from there on manages them, the FluxIns
 ```
 
 It checks that every `*.sops.yaml` is encrypted, builds every kustomization, renders the tenants ResourceSet, and validates all of it against the Kubernetes and CRD schemas. It needs kustomize (or kubectl), [kubeconform](https://github.com/yannh/kubeconform) and the [flux-operator CLI](https://github.com/controlplaneio-fluxcd/flux-operator/releases). CI runs it on every push to `main` and on pull requests.
+
+## Previewing dashboards
+
+```sh
+./scripts/preview-dashboards.sh
+```
+
+It uploads a copy of every dashboard to a "Dashboard Previews" folder in Grafana, to see an edit before it's committed. Grafana is set to `allowUiUpdates: false` for the dashboards it loads from this repository, so it won't allow dashboard edits. Each copy keeps its title but gets its own uid, `<uid>-preview`. A copy whose file is gone is removed. It needs jq, curl, kubectl access to the `grafana-admin` Secret, and the VPN; `GRAFANA_URL` overrides the address.
