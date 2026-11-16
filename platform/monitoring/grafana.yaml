@@ -43,6 +43,9 @@ spec:
             url: http://prometheus-server.monitoring.svc
             access: proxy
             isDefault: true
+            jsonData:
+              # Value of `server.global.scrape_interval` in prometheus-values.yaml.
+              timeInterval: 30s
 
     # Dashboards are the JSON files in dashboards/, which Grafana provisions
     # itself from a mounted ConfigMap. Git is the source: Grafana won't save
