@@ -37,7 +37,7 @@
     {
       "id": 1,
       "type": "timeseries",
-      "title": "CPU usage per node",
+      "title": "CPU usage",
       "description": "Average busy fraction across all cores, per node: 1 minus the idle fraction. Hidden unless up was 1 for the whole rate window and the scrape before it, since rate() over a part-empty window is wrong.",
       "gridPos": { "h": 6, "w": 24, "x": 0, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
@@ -47,6 +47,7 @@
           "min": 0,
           "max": 1,
           "custom": {
+            "axisWidth": 70,
             "drawStyle": "line",
             "lineInterpolation": "smooth",
             "fillOpacity": 10,
@@ -56,7 +57,7 @@
         "overrides": []
       },
       "options": {
-        "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] },
+        "legend": { "displayMode": "table", "placement": "right", "width": 320, "calcs": ["lastNotNull", "max"] },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "targets": [
@@ -71,7 +72,7 @@
     {
       "id": 2,
       "type": "timeseries",
-      "title": "Memory usage per node",
+      "title": "Memory usage",
       "description": "Fraction of RAM in use per node: 1 minus MemAvailable / MemTotal.",
       "gridPos": { "h": 6, "w": 24, "x": 0, "y": 6 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
@@ -81,6 +82,7 @@
           "min": 0,
           "max": 1,
           "custom": {
+            "axisWidth": 70,
             "drawStyle": "line",
             "lineInterpolation": "smooth",
             "fillOpacity": 10,
@@ -90,7 +92,7 @@
         "overrides": []
       },
       "options": {
-        "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] },
+        "legend": { "displayMode": "table", "placement": "right", "width": 320, "calcs": ["lastNotNull", "max"] },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "targets": [
@@ -115,6 +117,7 @@
           "min": 0,
           "max": 1,
           "custom": {
+            "axisWidth": 70,
             "drawStyle": "line",
             "lineInterpolation": "smooth",
             "fillOpacity": 10,
@@ -124,7 +127,7 @@
         "overrides": []
       },
       "options": {
-        "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] },
+        "legend": { "displayMode": "table", "placement": "right", "width": 320, "calcs": ["lastNotNull", "max"] },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "targets": [
@@ -139,7 +142,7 @@
     {
       "id": 4,
       "type": "timeseries",
-      "title": "Network in per node",
+      "title": "Network in",
       "description": "Bytes per second received through each node's eth0. Hidden unless up was 1 for the whole rate window and the scrape before it.",
       "gridPos": { "h": 6, "w": 24, "x": 0, "y": 18 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
@@ -147,6 +150,7 @@
         "defaults": {
           "unit": "binBps",
           "custom": {
+            "axisWidth": 70,
             "drawStyle": "line",
             "lineInterpolation": "smooth",
             "fillOpacity": 10,
@@ -156,7 +160,7 @@
         "overrides": []
       },
       "options": {
-        "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] },
+        "legend": { "displayMode": "table", "placement": "right", "width": 320, "calcs": ["lastNotNull", "max"] },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "targets": [
@@ -171,7 +175,7 @@
     {
       "id": 5,
       "type": "timeseries",
-      "title": "Network out per node",
+      "title": "Network out",
       "description": "Bytes per second sent through each node's eth0. Hidden unless up was 1 for the whole rate window and the scrape before it.",
       "gridPos": { "h": 6, "w": 24, "x": 0, "y": 24 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
@@ -179,6 +183,7 @@
         "defaults": {
           "unit": "binBps",
           "custom": {
+            "axisWidth": 70,
             "drawStyle": "line",
             "lineInterpolation": "smooth",
             "fillOpacity": 10,
@@ -188,7 +193,7 @@
         "overrides": []
       },
       "options": {
-        "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] },
+        "legend": { "displayMode": "table", "placement": "right", "width": 320, "calcs": ["lastNotNull", "max"] },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "targets": [
