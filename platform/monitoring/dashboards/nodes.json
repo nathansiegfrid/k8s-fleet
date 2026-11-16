@@ -39,7 +39,7 @@
       "type": "timeseries",
       "title": "CPU usage per node",
       "description": "Average busy fraction across all cores, per node: 1 minus the idle fraction. Hidden unless up was 1 for the whole rate window and the scrape before it, since rate() over a part-empty window is wrong.",
-      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 0 },
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
@@ -56,7 +56,7 @@
         "overrides": []
       },
       "options": {
-        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] },
+        "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "targets": [
@@ -73,7 +73,7 @@
       "type": "timeseries",
       "title": "Memory usage per node",
       "description": "Fraction of RAM in use per node: 1 minus MemAvailable / MemTotal.",
-      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 9 },
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 6 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
@@ -90,7 +90,7 @@
         "overrides": []
       },
       "options": {
-        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] },
+        "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "targets": [
@@ -99,6 +99,40 @@
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "1 - node_memory_MemAvailable_bytes{node=~\"$node\"} / node_memory_MemTotal_bytes{node=~\"$node\"}",
           "legendFormat": "{{node}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Disk usage per filesystem",
+      "description": "Fraction of each filesystem in use: 1 minus avail / size. Leaves out tmpfs, which is RAM, and the EFI partition.",
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "1 - node_filesystem_avail_bytes{fstype!~\"tmpfs|vfat\", node=~\"$node\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|vfat\", node=~\"$node\"}",
+          "legendFormat": "{{node}} {{mountpoint}}"
         }
       ]
     }
