@@ -135,6 +135,70 @@
           "legendFormat": "{{node}} {{mountpoint}}"
         }
       ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Network in per node",
+      "description": "Bytes per second received through each node's eth0. Hidden unless up was 1 for the whole rate window and the scrape before it.",
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 18 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "binBps",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "rate(node_network_receive_bytes_total{device=\"eth0\", node=~\"$node\"}[$__rate_interval]) and on (node) (min_over_time(up{job=\"node-exporter\"}[$__rate_interval]) == 1 and up{job=\"node-exporter\"} offset $__rate_interval == 1)",
+          "legendFormat": "{{node}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Network out per node",
+      "description": "Bytes per second sent through each node's eth0. Hidden unless up was 1 for the whole rate window and the scrape before it.",
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 24 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "binBps",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "rate(node_network_transmit_bytes_total{device=\"eth0\", node=~\"$node\"}[$__rate_interval]) and on (node) (min_over_time(up{job=\"node-exporter\"}[$__rate_interval]) == 1 and up{job=\"node-exporter\"} offset $__rate_interval == 1)",
+          "legendFormat": "{{node}}"
+        }
+      ]
     }
   ]
 }
