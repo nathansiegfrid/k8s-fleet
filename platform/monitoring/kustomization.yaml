@@ -32,6 +32,7 @@ configMapGenerator:
   - name: grafana-dashboards
     namespace: monitoring
     files:
-      - dashboards/nodes.json
+      - dashboards/node-host-metrics.json
+      - dashboards/node-allocation.json
     options:
       disableNameSuffixHash: true

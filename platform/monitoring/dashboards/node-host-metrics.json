@@ -1,6 +1,6 @@
 {
-  "uid": "nodes",
-  "title": "Nodes",
+  "uid": "node-host-metrics",
+  "title": "Node Host Metrics",
   "tags": ["homelab", "node-exporter"],
   "editable": true,
   "timezone": "browser",
