@@ -1,0 +1,20 @@
+# Grafana, its route on the private Gateway, and its dashboards.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - oci-repository.yaml
+  - helm-release.yaml
+  - http-route.yaml
+  # Created with `sops`, so it's never in git in plaintext.
+  - grafana-admin.sops.yaml
+
+configMapGenerator:
+  # Every dashboard, one key per file. Grafana mounts it by this name, and
+  # sees an edit within about a minute, without a restart.
+  - name: grafana-dashboards
+    namespace: monitoring
+    files:
+      - dashboards/node-host-metrics.json
+      - dashboards/node-allocation.json
+    options:
+      disableNameSuffixHash: true

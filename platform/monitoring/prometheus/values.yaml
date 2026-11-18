@@ -1,5 +1,6 @@
-# Values for the prometheus chart, read by prometheus.yaml through a ConfigMap
-# so that `null` survives: the API server drops it from a HelmRelease's values.
+# Values for the prometheus chart, read by helm-release.yaml through a
+# ConfigMap so that `null` survives: the API server drops it from a
+# HelmRelease's values.
 alertmanager:
   enabled: false
 kube-state-metrics:
@@ -10,7 +11,7 @@ prometheus-pushgateway:
   enabled: false
 
 server:
-  # Bound to the ClusterRole in prometheus-rbac.yaml instead of the chart's.
+  # Bound to the ClusterRole in rbac.yaml instead of the chart's.
   useExistingClusterRoleName: prometheus-server
 
   global:
