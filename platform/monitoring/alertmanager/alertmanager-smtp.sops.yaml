@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: alertmanager-smtp
+    namespace: monitoring
+stringData:
+    password: ENC[AES256_GCM,data:AqvoSLsYLwBpUOOhhCUEc5sqpcI=,iv:AebjVhero3XUeynZTcPN6/0CLOiVbHcOaIvWcajljJA=,tag:oENmIVyX0sec3d79DFBQdw==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBBOFBNY0djUjNUYjNCN3Yy
+            QkFhbjJGbUVONHo0bXlNc2g1NThFeWVZcWtFCi85cXRqVmRXMWZnTzBxWTdUQ0wy
+            SjdFNHlKUDBSTmtVa08ycmNqMm5pZGMKLS0tIC8vL2d1YnhHMWZLVDlBT0dNYnpE
+            Snl4TGJSNXV1YmlDL3U0ZGRQanI0L0EKVu+wEAIkDYqD4VEQThh2aCc/lLbrhUCO
+            7goaEsediNO2i5V2FExasLCxa8WVoFp5Z7a6Krj9M01yxd/XZqVZSQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age14ffhzy8v4ed9kr0fertclh3tvevppa7ygxl5gkep8h7w8ys8ny3scnsqsf
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB1QTZqdXA3Uk1xL2pXNnFw
+            UXdsRXdhd2JQVHk4bDJmVk9UWDQ0OHRabTNJCnlZYW1lQmkrMUVxRjNhQVZjY09W
+            THFmOVlpWXBiWnh0OU1qbmp1M3RTVjQKLS0tIE1NaGh2ckdXbEMvT3pVVXJocjlF
+            NHgxRVpLem11MmJYbnh3QjdJeGh2dzgK//523BBQ7Z2LsZYv8wwkWiSrpbJTLCyB
+            9lE8Fm63q/kvSsNBq55RUu8b0+/tBZkemVmKU77q+3uRJ7gCDxdlCw==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1t3f664zrvst5vgwvum90pdpllw85dc9h56v7yl6dg443aaw7ng4s7uhgd0
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-18T06:10:48Z"
+    mac: ENC[AES256_GCM,data:dhAAYVJCtBjzvUV1adQSj+Aa+0c3Z4T/c3IpIzNmTSOPxG9i0ZOcjTa8VH6/PmODCH7j4O54Az78s4IJ1n+JGfQVM5BOw3ru1xTvp/GMjqYGRoPRzKxOh7PCpjmcVmY3XzNDJU/cOuBqxofggywPznVfNRIf9VUre0WSRH4OXaQ=,iv:VJMkQS9BPkOjgvHkPDEus/6iiIqe6MNQps1dyE2y674=,tag:nSAzqT/fc3LNYFTnjnAL7g==,type:str]
+    version: 3.13.3

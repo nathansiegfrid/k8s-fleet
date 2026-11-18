@@ -8,4 +8,5 @@ resources:
   - node-exporter
   - kube-state-metrics
   - prometheus
+  - alertmanager
   - grafana

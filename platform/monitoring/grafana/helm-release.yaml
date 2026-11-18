@@ -46,6 +46,14 @@ spec:
             jsonData:
               # Value of `server.global.scrape_interval` in prometheus/values.yaml.
               timeInterval: 30s
+          # Alerts and silences, behind Grafana's login.
+          - name: Alertmanager
+            type: alertmanager
+            uid: alertmanager
+            url: http://alertmanager.monitoring.svc:9093
+            access: proxy
+            jsonData:
+              implementation: prometheus
 
     # Dashboards are the JSON files in dashboards/, which Grafana provisions
     # itself from a mounted ConfigMap. Git is the source: Grafana won't save

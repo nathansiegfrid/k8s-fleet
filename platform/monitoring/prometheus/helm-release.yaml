@@ -1,5 +1,5 @@
 # The Prometheus server, with its scrape jobs in values.yaml. Only the
-# server: the exporters are separate releases; Alertmanager comes later.
+# server: the exporters and Alertmanager are separate releases.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:

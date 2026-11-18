@@ -18,6 +18,11 @@ server:
     scrape_interval: 30s
     evaluation_interval: 30s
 
+  # Where alerts go: the one Alertmanager, behind its Service.
+  alertmanagers:
+    - static_configs:
+        - targets: [alertmanager.monitoring.svc:9093]
+
   # local-path doesn't enforce a volume's size, so retentionSize is what
   # keeps the data under it.
   retention: 15d
@@ -135,3 +140,8 @@ serverFiles:
       - job_name: kube-state-metrics
         static_configs:
           - targets: [kube-state-metrics.monitoring.svc:8080]
+
+      # Alertmanager's own metrics, such as emails it failed to send.
+      - job_name: alertmanager
+        static_configs:
+          - targets: [alertmanager.monitoring.svc:9093]

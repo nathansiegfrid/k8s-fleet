@@ -1,0 +1,65 @@
+# Alertmanager: groups Prometheus's alerts and emails them through smtp2go.
+# Only Prometheus and Grafana can reach it.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: alertmanager
+  namespace: flux-system
+spec:
+  serviceAccountName: helm-controller
+  interval: 1h
+  timeout: 5m
+
+  chartRef:
+    kind: OCIRepository
+    name: alertmanager
+  releaseName: alertmanager
+  targetNamespace: monitoring
+  storageNamespace: monitoring
+
+  # `config.receivers` is defined in alertmanager-values.sops.yaml so
+  # recipient's email address isn't public.
+  valuesFrom:
+    - kind: Secret
+      name: alertmanager-values
+      valuesKey: values.yaml
+
+  values:
+    # It never calls the Kubernetes API.
+    automountServiceAccountToken: false
+
+    # One replica has no peers, so an empty address turns clustering off
+    # instead of leaving it listening on 9094.
+    extraArgs:
+      cluster.listen-address: ""
+
+    # The SMTP password from alertmanager-smtp.sops.yaml, as a file the
+    # config reads, so it stays out of the ConfigMap the chart renders.
+    extraSecretMounts:
+      - name: smtp
+        mountPath: /etc/secrets/smtp
+        secretName: alertmanager-smtp
+        readOnly: true
+
+    config:
+      global:
+        smtp_smarthost: mail.smtp2go.com:465
+        smtp_from: no-reply@notify.siegfrid.com
+        smtp_auth_username: no-reply@notify.siegfrid.com
+        smtp_auth_password_file: /etc/secrets/smtp/password
+      route:
+        receiver: email
+        group_by: [alertname]
+        group_wait: 30s
+        group_interval: 5m
+        repeat_interval: 12h
+      # Do not define `receivers` here, it would replace the one from
+      # alertmanager-values Secret along with the recipients.
+      # Flux merges `spec.valuesFrom` first and `spec.values` on top.
+
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 128Mi

@@ -1,0 +1,9 @@
+# Alertmanager, emailing Prometheus's alerts through smtp2go.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - oci-repository.yaml
+  - helm-release.yaml
+  # Created with `sops`, so it's never in git in plaintext.
+  - alertmanager-values.sops.yaml
+  - alertmanager-smtp.sops.yaml
