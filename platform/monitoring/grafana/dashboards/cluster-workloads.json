@@ -1,0 +1,183 @@
+{
+  "uid": "cluster-workloads",
+  "title": "Cluster Workloads",
+  "tags": [
+    "homelab",
+    "cadvisor",
+    "kube-state-metrics"
+  ],
+  "editable": true,
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "annotations": {
+    "list": []
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "node",
+        "label": "Node",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(up{job=\"node-exporter\"}, node)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(up{job=\"node-exporter\"}, node)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": [],
+        "regex": "",
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "CPU by workload",
+      "description": "CPU usage in cores per workload, summed over the selected nodes and stacked. A pod's workload comes from Prometheus's recording rule namespace_workload_pod:kube_pod_owner:relabel: what owns it, through its ReplicaSet for a Deployment or Rollout. A static pod, or a pod the rule doesn't know, shows under its own name. From cAdvisor: each pod's containers, leaving out the pod-level cgroup, which would count them twice.",
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "axisLabel": "cores",
+            "axisWidth": 30,
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 70,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "sortBy": "Last *",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (namespace, workload) (sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{node=~\"$node\", container!=\"\", container!=\"POD\"}[$__rate_interval])) * on (namespace, pod) group_left (workload) namespace_workload_pod:kube_pod_owner:relabel or label_replace(sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{node=~\"$node\", container!=\"\", container!=\"POD\"}[$__rate_interval])) unless on (namespace, pod) namespace_workload_pod:kube_pod_owner:relabel, \"workload\", \"$1\", \"pod\", \"(.+)\"))",
+          "legendFormat": "{{namespace}}/{{workload}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Memory by workload",
+      "description": "Working set per workload, summed over the selected nodes and stacked: the memory the kubelet counts for eviction and the kernel can't reclaim without pressure. Workloads as in the CPU panel.",
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "min": 0,
+          "custom": {
+            "axisWidth": 70,
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 70,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "sortBy": "Last *",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (namespace, workload) (sum by (namespace, pod) (container_memory_working_set_bytes{node=~\"$node\", container!=\"\", container!=\"POD\"}) * on (namespace, pod) group_left (workload) namespace_workload_pod:kube_pod_owner:relabel or label_replace(sum by (namespace, pod) (container_memory_working_set_bytes{node=~\"$node\", container!=\"\", container!=\"POD\"}) unless on (namespace, pod) namespace_workload_pod:kube_pod_owner:relabel, \"workload\", \"$1\", \"pod\", \"(.+)\"))",
+          "legendFormat": "{{namespace}}/{{workload}}"
+        }
+      ]
+    }
+  ]
+}

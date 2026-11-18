@@ -16,5 +16,7 @@ configMapGenerator:
     files:
       - dashboards/node-host-metrics.json
       - dashboards/node-allocation.json
+      - dashboards/node-pod-usage.json
+      - dashboards/cluster-workloads.json
     options:
       disableNameSuffixHash: true
