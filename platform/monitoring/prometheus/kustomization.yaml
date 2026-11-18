@@ -1,4 +1,4 @@
-# The Prometheus server, its role, and its values.
+# The Prometheus server, RBAC role, values, and alerting rules.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -17,3 +17,12 @@ configMapGenerator:
       labels:
         # Upgrade the release as soon as values.yaml changes.
         reconcile.fluxcd.io/watch: Enabled
+
+  # Every rule file, one key per file, mounted into Prometheus and its
+  # reload sidecar. An edit reloads the rules without a Helm upgrade.
+  - name: prometheus-rules
+    namespace: monitoring
+    files:
+      - rules/nodes.yaml
+    options:
+      disableNameSuffixHash: true

@@ -1,0 +1,11 @@
+groups:
+  - name: nodes
+    rules:
+      # The kubelet stopped reporting, so the node is likely down.
+      - alert: NodeNotReady
+        expr: kube_node_status_condition{condition="Ready", status="true"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.node }} is not Ready"
