@@ -24,5 +24,6 @@ configMapGenerator:
     namespace: monitoring
     files:
       - rules/nodes.yaml
+      - rules/workloads.yaml
     options:
       disableNameSuffixHash: true
