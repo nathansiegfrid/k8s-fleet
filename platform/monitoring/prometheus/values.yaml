@@ -135,6 +135,9 @@ serverFiles:
       - job_name: cadvisor
         scheme: https
         metrics_path: /metrics/cadvisor
+        # Its samples carry their own timestamps, so without this a deleted
+        # container's series lingers in queries for 5 minutes.
+        track_timestamps_staleness: true
         authorization:
           credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
         tls_config:
