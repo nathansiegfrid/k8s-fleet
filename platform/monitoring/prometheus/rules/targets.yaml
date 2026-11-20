@@ -1,0 +1,13 @@
+groups:
+  - name: targets
+    rules:
+      # A scrape failed for 5 minutes: the exporter, or its node, is down.
+      # internal_ip, from an address like 10.0.0.1:6443, matches the API
+      # server's target to its node, which has no node label.
+      - alert: TargetDown
+        expr: label_replace(up == 0, "internal_ip", "$1", "instance", "(.+):\\d+")
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.job }} at {{ $labels.instance }} is down"

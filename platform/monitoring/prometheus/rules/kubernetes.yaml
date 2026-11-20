@@ -1,0 +1,10 @@
+groups:
+  - name: kubernetes
+    rules:
+      - alert: PodCrashLooping
+        expr: max_over_time(kube_pod_container_status_waiting_reason{reason="CrashLoopBackOff"}[5m]) >= 1
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is crash-looping"

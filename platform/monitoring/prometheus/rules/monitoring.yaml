@@ -1,0 +1,19 @@
+groups:
+  # The monitoring itself.
+  - name: monitoring
+    rules:
+      - alert: PrometheusRuleFailures
+        expr: increase(prometheus_rule_evaluation_failures_total[5m]) > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus failed to evaluate rules in {{ $labels.rule_group }}"
+
+      # Past the size limit, the oldest data goes before its 15 days.
+      - alert: PrometheusRetentionLimitNear
+        expr: prometheus_tsdb_storage_blocks_bytes / prometheus_tsdb_retention_limit_bytes > 0.90
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus's storage is at {{ $value | humanizePercentage }} of its size limit"

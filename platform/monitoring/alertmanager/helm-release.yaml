@@ -53,6 +53,15 @@ spec:
         group_wait: 30s
         group_interval: 5m
         repeat_interval: 12h
+      # A node that isn't Ready holds back TargetDown for its own targets, so
+      # one dead node sends one email. The API server's has only internal_ip.
+      inhibit_rules:
+        - source_matchers: ['alertname="NodeNotReady"']
+          target_matchers: ['alertname="TargetDown"']
+          equal: [node]
+        - source_matchers: ['alertname="NodeNotReady"']
+          target_matchers: ['alertname="TargetDown"']
+          equal: [internal_ip]
       # Do not define `receivers` here, it would replace the one from
       # alertmanager-values Secret along with the recipients.
       # Flux merges `spec.valuesFrom` first and `spec.values` on top.

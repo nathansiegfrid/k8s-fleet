@@ -1,11 +1,44 @@
 groups:
   - name: nodes
     rules:
-      # The kubelet stopped reporting, so the node is likely down.
+      # The kubelet stopped reporting, so the node is likely down. Its IP
+      # lets Alertmanager hold back TargetDown for its API server too.
       - alert: NodeNotReady
-        expr: kube_node_status_condition{condition="Ready", status="true"} == 0
+        expr: |
+          (kube_node_status_condition{condition="Ready", status="true"} == 0)
+          * on (node) group_left (internal_ip) kube_node_info
         for: 5m
         labels:
           severity: critical
         annotations:
           summary: "{{ $labels.node }} is not Ready"
+
+      # Space reserved for root counts as used, since pods can't write it.
+      - alert: NodeFilesystemAlmostFull
+        expr: node_filesystem_avail_bytes{fstype!~"tmpfs|vfat"} / node_filesystem_size_bytes < 0.10
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.mountpoint }} on {{ $labels.node }} has {{ $value | humanizePercentage }} left"
+
+      # At the last 6 hours' rate, it fills within a day. Only below 40%
+      # free, so a burst of writes on a roomy disk doesn't fire it.
+      - alert: NodeFilesystemFillingUp
+        expr: |
+          predict_linear(node_filesystem_avail_bytes{fstype!~"tmpfs|vfat"}[6h], 24 * 3600) < 0
+          and node_filesystem_avail_bytes{fstype!~"tmpfs|vfat"} / node_filesystem_size_bytes < 0.40
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.mountpoint }} on {{ $labels.node }} fills within a day"
+
+      # MemAvailable counts cache the kernel can reclaim, unlike MemFree.
+      - alert: NodeMemoryLow
+        expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.10
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.node }} has {{ $value | humanizePercentage }} of its memory available"
