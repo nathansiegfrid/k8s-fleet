@@ -18,5 +18,7 @@ configMapGenerator:
       - dashboards/node-allocation.json
       - dashboards/node-pod-usage.json
       - dashboards/cluster-usage.json
+      - dashboards/cluster-allocation.json
+      - dashboards/cluster-health.json
     options:
       disableNameSuffixHash: true

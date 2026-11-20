@@ -1,0 +1,1008 @@
+{
+  "uid": "cluster-allocation",
+  "title": "Cluster Allocation",
+  "tags": [
+    "homelab",
+    "cadvisor",
+    "kube-state-metrics"
+  ],
+  "editable": true,
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "annotations": {
+    "list": []
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "namespace",
+        "label": "Namespace",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(kube_pod_owner, namespace)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(kube_pod_owner, namespace)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": [],
+        "regex": "",
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 2,
+      "type": "bargauge",
+      "title": "Control-plane CPU",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "description": "CPU used now by the whole node, pods and system, as in Node Allocation, and requested and limited by running and pending pods, as a share of the Ready control-plane nodes' allocatable, whatever the namespace filter. A node that isn't Ready, and its pods, are left out: its capacity can't take pods. Limits may pass 100%: they're overcommitted. A pod without a limit adds nothing to it.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.8
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "showUnfilled": true,
+        "valueMode": "color",
+        "namePlacement": "left",
+        "minVizHeight": 16,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(sum by (node) (rate(node_cpu_seconds_total{mode!~\"idle|iowait|steal\"}[5m])) * on (node) group_left () (max by (node) (kube_node_role{role=\"control-plane\"}) and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1)) / sum(kube_node_status_allocatable{resource=\"cpu\"} * on (node) group_left () (max by (node) (kube_node_role{role=\"control-plane\"}) and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1))",
+          "legendFormat": "used",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"cpu\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"cpu\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (node) group_left () (max by (node) (kube_node_role{role=\"control-plane\"}) and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1)) / sum(kube_node_status_allocatable{resource=\"cpu\"} * on (node) group_left () (max by (node) (kube_node_role{role=\"control-plane\"}) and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1))",
+          "legendFormat": "requested",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_limits{resource=\"cpu\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_limits{resource=\"cpu\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (node) group_left () (max by (node) (kube_node_role{role=\"control-plane\"}) and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1)) / sum(kube_node_status_allocatable{resource=\"cpu\"} * on (node) group_left () (max by (node) (kube_node_role{role=\"control-plane\"}) and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1))",
+          "legendFormat": "limit",
+          "instant": true,
+          "range": false
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "bargauge",
+      "title": "Worker CPU",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "description": "CPU used now by the whole node, pods and system, as in Node Allocation, and requested and limited by running and pending pods, as a share of the Ready worker nodes' allocatable, whatever the namespace filter. A node that isn't Ready, and its pods, are left out: its capacity can't take pods. Limits may pass 100%: they're overcommitted. A pod without a limit adds nothing to it.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.8
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "showUnfilled": true,
+        "valueMode": "color",
+        "namePlacement": "left",
+        "minVizHeight": 16,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(sum by (node) (rate(node_cpu_seconds_total{mode!~\"idle|iowait|steal\"}[5m])) * on (node) group_left () (max by (node) (kube_node_info) unless on (node) kube_node_role{role=\"control-plane\"} and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1)) / sum(kube_node_status_allocatable{resource=\"cpu\"} * on (node) group_left () (max by (node) (kube_node_info) unless on (node) kube_node_role{role=\"control-plane\"} and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1))",
+          "legendFormat": "used",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"cpu\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"cpu\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (node) group_left () (max by (node) (kube_node_info) unless on (node) kube_node_role{role=\"control-plane\"} and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1)) / sum(kube_node_status_allocatable{resource=\"cpu\"} * on (node) group_left () (max by (node) (kube_node_info) unless on (node) kube_node_role{role=\"control-plane\"} and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1))",
+          "legendFormat": "requested",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_limits{resource=\"cpu\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_limits{resource=\"cpu\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (node) group_left () (max by (node) (kube_node_info) unless on (node) kube_node_role{role=\"control-plane\"} and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1)) / sum(kube_node_status_allocatable{resource=\"cpu\"} * on (node) group_left () (max by (node) (kube_node_info) unless on (node) kube_node_role{role=\"control-plane\"} and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1))",
+          "legendFormat": "limit",
+          "instant": true,
+          "range": false
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "bargauge",
+      "title": "Control-plane memory",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "description": "Memory used now by the whole node, pods and system, as in Node Allocation, and requested and limited by running and pending pods, as a share of the Ready control-plane nodes' allocatable, whatever the namespace filter. A node that isn't Ready, and its pods, are left out: its capacity can't take pods. Limits may pass 100%: they're overcommitted. A pod without a limit adds nothing to it.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.8
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "showUnfilled": true,
+        "valueMode": "color",
+        "namePlacement": "left",
+        "minVizHeight": 16,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(sum by (node) (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) * on (node) group_left () (max by (node) (kube_node_role{role=\"control-plane\"}) and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1)) / sum(kube_node_status_allocatable{resource=\"memory\"} * on (node) group_left () (max by (node) (kube_node_role{role=\"control-plane\"}) and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1))",
+          "legendFormat": "used",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"memory\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"memory\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (node) group_left () (max by (node) (kube_node_role{role=\"control-plane\"}) and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1)) / sum(kube_node_status_allocatable{resource=\"memory\"} * on (node) group_left () (max by (node) (kube_node_role{role=\"control-plane\"}) and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1))",
+          "legendFormat": "requested",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_limits{resource=\"memory\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_limits{resource=\"memory\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (node) group_left () (max by (node) (kube_node_role{role=\"control-plane\"}) and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1)) / sum(kube_node_status_allocatable{resource=\"memory\"} * on (node) group_left () (max by (node) (kube_node_role{role=\"control-plane\"}) and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1))",
+          "legendFormat": "limit",
+          "instant": true,
+          "range": false
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "bargauge",
+      "title": "Worker memory",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "description": "Memory used now by the whole node, pods and system, as in Node Allocation, and requested and limited by running and pending pods, as a share of the Ready worker nodes' allocatable, whatever the namespace filter. A node that isn't Ready, and its pods, are left out: its capacity can't take pods. Limits may pass 100%: they're overcommitted. A pod without a limit adds nothing to it.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.8
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "showUnfilled": true,
+        "valueMode": "color",
+        "namePlacement": "left",
+        "minVizHeight": 16,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(sum by (node) (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) * on (node) group_left () (max by (node) (kube_node_info) unless on (node) kube_node_role{role=\"control-plane\"} and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1)) / sum(kube_node_status_allocatable{resource=\"memory\"} * on (node) group_left () (max by (node) (kube_node_info) unless on (node) kube_node_role{role=\"control-plane\"} and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1))",
+          "legendFormat": "used",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"memory\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"memory\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (node) group_left () (max by (node) (kube_node_info) unless on (node) kube_node_role{role=\"control-plane\"} and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1)) / sum(kube_node_status_allocatable{resource=\"memory\"} * on (node) group_left () (max by (node) (kube_node_info) unless on (node) kube_node_role{role=\"control-plane\"} and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1))",
+          "legendFormat": "requested",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_limits{resource=\"memory\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_limits{resource=\"memory\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (node) group_left () (max by (node) (kube_node_info) unless on (node) kube_node_role{role=\"control-plane\"} and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1)) / sum(kube_node_status_allocatable{resource=\"memory\"} * on (node) group_left () (max by (node) (kube_node_info) unless on (node) kube_node_role{role=\"control-plane\"} and on (node) kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 1))",
+          "legendFormat": "limit",
+          "instant": true,
+          "range": false
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "type": "table",
+      "title": "Requests against use, per workload",
+      "description": "What each workload in the selected namespaces used over the time range, at one-minute steps, against what it reserves. CPU is its 90th percentile, so a one-off spike such as a restart doesn't count; memory is its peak, since one peak above the request is enough to be evicted. The ratio is blue below 25%: it reserves far more than it uses. Above 100%, CPU is orange: it runs on spare CPU and slows when the node is busy. Memory is red: when the node runs short, its pods are evicted first. A workload without a request shows none: the scheduler counts it as zero. A request or limit counts its larger part, the containers or an init container, as the scheduler does.",
+      "gridPos": {
+        "h": 22,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\")))",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "1000 * (avg_over_time((sum by (namespace, owner_name) (sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}[2m])) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m]))",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "1000 * (quantile_over_time(0.9, (sum by (namespace, owner_name) (sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}[2m])) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m]))",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "1000 * (sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "refId": "E",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "1000 * (sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_limits{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_limits{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "refId": "F",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "quantile_over_time(0.9, (sum by (namespace, owner_name) (sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}[2m])) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m]) / sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\")))",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "refId": "G",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "avg_over_time((sum by (namespace, owner_name) (sum by (namespace, pod) (container_memory_working_set_bytes{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "refId": "H",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max_over_time((sum by (namespace, owner_name) (sum by (namespace, pod) (container_memory_working_set_bytes{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "refId": "I",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\")))",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "refId": "J",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_limits{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_limits{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\")))",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "refId": "K",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max_over_time((sum by (namespace, owner_name) (sum by (namespace, pod) (container_memory_working_set_bytes{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m]) / sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\")))",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "namespace": 0,
+              "owner_name": 1,
+              "Value #F": 2,
+              "Value #K": 3,
+              "Value #A": 4,
+              "Value #B": 5,
+              "Value #C": 6,
+              "Value #D": 7,
+              "Value #E": 8,
+              "Value #G": 9,
+              "Value #H": 10,
+              "Value #I": 11,
+              "Value #J": 12
+            },
+            "renameByName": {
+              "namespace": "Namespace",
+              "owner_name": "Workload",
+              "Value #A": "Pods",
+              "Value #B": "CPU avg",
+              "Value #C": "CPU p90",
+              "Value #D": "CPU req",
+              "Value #E": "CPU limit",
+              "Value #F": "CPU p90/req",
+              "Value #G": "Mem avg",
+              "Value #H": "Mem peak",
+              "Value #I": "Mem req",
+              "Value #J": "Mem limit",
+              "Value #K": "Mem peak/req"
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU avg"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix:m"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU p90"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix:m"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU req"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix:m"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "noValue",
+                "value": "none"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU limit"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix:m"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Mem avg"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Mem peak"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Mem req"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "noValue",
+                "value": "none"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Mem limit"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU p90/req"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "blue",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 0.25
+                    },
+                    {
+                      "color": "orange",
+                      "value": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Mem peak/req"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "blue",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 0.25
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Namespace"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pods"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 70
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU p90/req"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Mem peak/req"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU avg"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU p90"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU req"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU limit"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Mem avg"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Mem peak"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Mem req"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Mem limit"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "CPU req",
+            "desc": true
+          }
+        ],
+        "footer": {
+          "show": false
+        }
+      }
+    }
+  ]
+}
