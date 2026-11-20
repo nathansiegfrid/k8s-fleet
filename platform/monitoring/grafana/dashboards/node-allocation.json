@@ -47,7 +47,7 @@
       "id": 1,
       "type": "timeseries",
       "title": "CPU",
-      "description": "The node's CPU as a fraction of its allocatable CPU. usage leaves out idle, iowait and steal; steal is time the hypervisor gave to other VMs. requests and limits come from the node's Pending and Running pods, each pod counted as the scheduler counts it: its containers together, or its largest init container, whichever is larger. The dotted line is allocatable.",
+      "description": "The node's CPU as a fraction of its allocatable CPU. usage leaves out idle, iowait and steal; steal is time the hypervisor gave to other VMs. requests and limits come from the node's Pending and Running pods, each pod counted as the scheduler counts it: its containers together, or its largest init container, whichever is larger. The dotted line is allocatable. Every line stops while the node is down, and comes back with usage, once a full window of scrapes is in.",
       "gridPos": { "h": 6, "w": 12, "x": 0, "y": 1 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
@@ -116,19 +116,19 @@
         {
           "refId": "C",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum by (node) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"cpu\", node=~\"$node\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"cpu\", node=~\"$node\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / on (node) kube_node_status_allocatable{resource=\"cpu\", node=~\"$node\"}",
+          "expr": "sum by (node) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"cpu\", node=~\"$node\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"cpu\", node=~\"$node\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / on (node) kube_node_status_allocatable{resource=\"cpu\", node=~\"$node\"} and on (node) (min_over_time(up{job=\"node-exporter\", node=~\"$node\"}[$__rate_interval]) == 1 and up{job=\"node-exporter\", node=~\"$node\"} offset $__rate_interval == 1)",
           "legendFormat": "requests"
         },
         {
           "refId": "D",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum by (node) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_limits{resource=\"cpu\", node=~\"$node\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_limits{resource=\"cpu\", node=~\"$node\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / on (node) kube_node_status_allocatable{resource=\"cpu\", node=~\"$node\"}",
+          "expr": "sum by (node) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_limits{resource=\"cpu\", node=~\"$node\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_limits{resource=\"cpu\", node=~\"$node\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / on (node) kube_node_status_allocatable{resource=\"cpu\", node=~\"$node\"} and on (node) (min_over_time(up{job=\"node-exporter\", node=~\"$node\"}[$__rate_interval]) == 1 and up{job=\"node-exporter\", node=~\"$node\"} offset $__rate_interval == 1)",
           "legendFormat": "limits"
         },
         {
           "refId": "E",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "vector(1)",
+          "expr": "max by (node) (min_over_time(up{job=\"node-exporter\", node=~\"$node\"}[$__rate_interval]) == 1 and up{job=\"node-exporter\", node=~\"$node\"} offset $__rate_interval == 1)",
           "legendFormat": "allocatable"
         }
       ]
@@ -137,7 +137,7 @@
       "id": 2,
       "type": "timeseries",
       "title": "Memory",
-      "description": "The node's memory as a fraction of its allocatable memory. usage is MemTotal minus MemAvailable, so cache the kernel can reclaim doesn't count. requests and limits come from the node's Pending and Running pods, each pod counted as the scheduler counts it. The dotted line is allocatable.",
+      "description": "The node's memory as a fraction of its allocatable memory. usage is MemTotal minus MemAvailable, so cache the kernel can reclaim doesn't count. requests and limits come from the node's Pending and Running pods, each pod counted as the scheduler counts it. The dotted line is allocatable. Every line stops while the node is down.",
       "gridPos": { "h": 6, "w": 12, "x": 12, "y": 1 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
@@ -193,19 +193,19 @@
         {
           "refId": "B",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum by (node) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"memory\", node=~\"$node\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"memory\", node=~\"$node\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / on (node) kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"}",
+          "expr": "sum by (node) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"memory\", node=~\"$node\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"memory\", node=~\"$node\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / on (node) kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} and on (node) (up{job=\"node-exporter\", node=~\"$node\"} == 1)",
           "legendFormat": "requests"
         },
         {
           "refId": "C",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum by (node) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_limits{resource=\"memory\", node=~\"$node\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_limits{resource=\"memory\", node=~\"$node\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / on (node) kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"}",
+          "expr": "sum by (node) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_limits{resource=\"memory\", node=~\"$node\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_limits{resource=\"memory\", node=~\"$node\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / on (node) kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"} and on (node) (up{job=\"node-exporter\", node=~\"$node\"} == 1)",
           "legendFormat": "limits"
         },
         {
           "refId": "D",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "vector(1)",
+          "expr": "max by (node) (up{job=\"node-exporter\", node=~\"$node\"} == 1)",
           "legendFormat": "allocatable"
         }
       ]
