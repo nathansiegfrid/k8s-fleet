@@ -7,7 +7,9 @@ groups:
         expr: |
           (kube_node_status_condition{condition="Ready", status="true"} == 0)
           * on (node) group_left (internal_ip) kube_node_info
-        for: 5m
+        # Shorter than TargetDown's 5m: a node is marked not Ready about a
+        # minute after its scrapes fail, and must fire first to inhibit them.
+        for: 3m
         labels:
           severity: critical
         annotations:
