@@ -2,8 +2,9 @@
 # Check what Flux will apply:
 #   1. every *.sops.yaml file is actually encrypted, and
 #   2. every kustomization builds and matches the Kubernetes and CRD schemas,
-#   3. every ResourceSet renders to objects that match them too.
-# Needs kustomize (or kubectl), kubeconform and the flux-operator CLI.
+#   3. every ResourceSet renders to objects that match them too, and
+#   4. every Prometheus rule file passes promtool.
+# Needs kustomize (or kubectl), kubeconform, the flux-operator CLI and promtool.
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -39,5 +40,10 @@ while IFS= read -r file; do
   echo "==> $file (rendered)"
   flux-operator build resourceset -f "$file" | kubeconform -strict -summary "${schemas[@]}" || status=1
 done < <(grep -rl --include='*.yaml' '^kind: ResourceSet' clusters platform policies tenants | sort)
+
+echo "==> Prometheus rules"
+while IFS= read -r file; do
+  promtool check rules "$file" >/dev/null || { echo "invalid rules: $file" >&2; status=1; }
+done < <(find platform -path '*/prometheus/rules/*.yaml' | sort)
 
 exit "$status"

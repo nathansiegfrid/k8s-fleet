@@ -58,7 +58,7 @@ Flux then adopts both Helm releases, and from there on manages them, the FluxIns
 ./scripts/validate.sh
 ```
 
-It checks that every `*.sops.yaml` is encrypted, builds every kustomization, renders the tenants ResourceSet, and validates all of it against the Kubernetes and CRD schemas. It needs kustomize (or kubectl), [kubeconform](https://github.com/yannh/kubeconform) and the [flux-operator CLI](https://github.com/controlplaneio-fluxcd/flux-operator/releases). CI runs it on every push to `main` and on pull requests.
+It checks that every `*.sops.yaml` is encrypted, builds every kustomization, renders the tenants ResourceSet, validates all of it against the Kubernetes and CRD schemas, and checks Prometheus's rule files. It needs kustomize (or kubectl), [kubeconform](https://github.com/yannh/kubeconform), the [flux-operator CLI](https://github.com/controlplaneio-fluxcd/flux-operator/releases) and promtool, which comes with [Prometheus](https://github.com/prometheus/prometheus/releases). CI runs it on every push to `main` and on pull requests.
 
 ## Previewing dashboards
 

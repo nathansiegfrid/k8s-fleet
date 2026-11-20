@@ -12,12 +12,15 @@ jobs:
       - uses: actions/checkout@v5
 
       # kubectl, which builds the kustomizations, is preinstalled on the runner.
-      - name: Install kubeconform and the flux-operator CLI
+      - name: Install kubeconform, the flux-operator CLI and promtool
         run: |
           curl -sfL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz \
             | sudo tar xz -C /usr/local/bin kubeconform
           curl -sfL https://github.com/controlplaneio-fluxcd/flux-operator/releases/download/v0.62.1/flux-operator_0.62.1_linux_amd64.tar.gz \
             | sudo tar xz -C /usr/local/bin flux-operator
+          # The version of the cluster's Prometheus, in prometheus/helm-release.yaml.
+          curl -sfL https://github.com/prometheus/prometheus/releases/download/v3.16.0/prometheus-3.16.0.linux-amd64.tar.gz \
+            | sudo tar xz -C /usr/local/bin --strip-components=1 prometheus-3.16.0.linux-amd64/promtool
 
       - name: Validate manifests
         run: ./scripts/validate.sh
