@@ -27,6 +27,5 @@ configMapGenerator:
       - rules/targets.yaml
       - rules/kubernetes.yaml
       - rules/monitoring.yaml
-      - rules/workloads.yaml
     options:
       disableNameSuffixHash: true

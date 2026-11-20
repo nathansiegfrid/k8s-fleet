@@ -1,0 +1,917 @@
+{
+  "uid": "cluster-usage",
+  "title": "Cluster Usage",
+  "tags": [
+    "homelab",
+    "cadvisor",
+    "kube-state-metrics"
+  ],
+  "editable": true,
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "annotations": {
+    "list": []
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "namespace",
+        "label": "Namespace",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(kube_pod_owner, namespace)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(kube_pod_owner, namespace)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "options": [],
+        "regex": "",
+        "hide": 0,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        }
+      },
+      {
+        "name": "workload",
+        "label": "Workload",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "query_result(max by (owner_name) (max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))",
+        "query": {
+          "qryType": 3,
+          "query": "query_result(max by (owner_name) (max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "options": [],
+        "regex": "/owner_name=\"([^\"]+)\"/",
+        "hide": 0,
+        "current": {}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "By namespace",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "CPU by namespace",
+      "description": "CPU usage in cores per selected namespace, stacked. Click a namespace to show its workloads below. From cAdvisor: each pod's containers, leaving out the pod-level cgroup, which would count them twice.",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "axisWidth": 40,
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 70,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "axisLabel": "cores"
+          },
+          "links": [
+            {
+              "title": "Show this namespace's workloads",
+              "url": "/d/${__dashboard.uid}?var-namespace=${__field.labels.namespace}&${__url_time_range}"
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "sortBy": "Last *",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (namespace) (rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}[$__rate_interval]))",
+          "legendFormat": "{{namespace}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Memory by namespace",
+      "description": "Memory working set per selected namespace, stacked: what the kernel counts against a limit. Click a namespace to show its workloads below. From cAdvisor: each pod's containers, leaving out the pod-level cgroup, which would count them twice.",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "min": 0,
+          "custom": {
+            "axisWidth": 40,
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 70,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          },
+          "links": [
+            {
+              "title": "Show this namespace's workloads",
+              "url": "/d/${__dashboard.uid}?var-namespace=${__field.labels.namespace}&${__url_time_range}"
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "sortBy": "Last *",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (namespace) (container_memory_working_set_bytes{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"})",
+          "legendFormat": "{{namespace}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "row",
+      "title": "By workload",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
+      "panels": []
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "CPU by workload",
+      "description": "CPU usage in cores per workload in the selected namespaces, stacked. Click a workload to show its pods below. A pod's workload is what owns it: a ReplicaSet, DaemonSet, StatefulSet or Job, or for a static pod, its node. A pod without an owner shows under its own name. From cAdvisor: each pod's containers, leaving out the pod-level cgroup, which would count them twice.",
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "axisWidth": 40,
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 70,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "axisLabel": "cores"
+          },
+          "links": [
+            {
+              "title": "Show this workload's pods",
+              "url": "/d/${__dashboard.uid}?var-namespace=${__field.labels.namespace}&var-workload=${__field.labels.owner_name}&${__url_time_range}"
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "sortBy": "Last *",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (namespace, owner_name) (sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}[$__rate_interval])) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\")))",
+          "legendFormat": "{{namespace}}/{{owner_name}}"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Memory by workload",
+      "description": "Memory working set per workload in the selected namespaces, stacked. Click a workload to show its pods below. A pod's workload is what owns it: a ReplicaSet, DaemonSet, StatefulSet or Job, or for a static pod, its node. A pod without an owner shows under its own name. From cAdvisor: each pod's containers, leaving out the pod-level cgroup, which would count them twice.",
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "min": 0,
+          "custom": {
+            "axisWidth": 40,
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 70,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          },
+          "links": [
+            {
+              "title": "Show this workload's pods",
+              "url": "/d/${__dashboard.uid}?var-namespace=${__field.labels.namespace}&var-workload=${__field.labels.owner_name}&${__url_time_range}"
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "sortBy": "Last *",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (namespace, owner_name) (sum by (namespace, pod) (container_memory_working_set_bytes{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\")))",
+          "legendFormat": "{{namespace}}/{{owner_name}}"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "row",
+      "title": "Pods of $workload",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "panels": []
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "CPU per pod",
+      "description": "CPU usage in cores of each of the selected workloads' pods, one line each: lines that rise together mean the workload, one line apart means that pod or its node. Dashed: each workload's request and limit for a typical pod, the median of its pods' totals. The limit is missing if no container has one.",
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 0,
+        "y": 27
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "axisWidth": 40,
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "axisLabel": "cores"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".* request$"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    10,
+                    10
+                  ]
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "none"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".* limit$"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    10,
+                    10
+                  ]
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "none"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "sortBy": "Max",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (namespace, pod, node) (rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}[$__rate_interval])) * on (namespace, pod) group_left () max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\", owner_name=~\"$workload\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\", pod=~\"$workload\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))",
+          "legendFormat": "{{pod}} on {{node}}"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "quantile by (namespace, owner_name) (0.5, sum by (namespace, pod) (kube_pod_container_resource_requests{namespace=~\"$namespace\", resource=\"cpu\"}) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\", owner_name=~\"$workload\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\", pod=~\"$workload\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\")))",
+          "legendFormat": "{{owner_name}} request"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "quantile by (namespace, owner_name) (0.5, sum by (namespace, pod) (kube_pod_container_resource_limits{namespace=~\"$namespace\", resource=\"cpu\"}) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\", owner_name=~\"$workload\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\", pod=~\"$workload\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\")))",
+          "legendFormat": "{{owner_name}} limit"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Memory per pod",
+      "description": "Memory working set of each of the selected workloads' pods, one line each. A pod that reaches its limit is OOMKilled. Dashed: each workload's request and limit for a typical pod, the median of its pods' totals. The limit is missing if no container has one.",
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 12,
+        "y": 27
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "min": 0,
+          "custom": {
+            "axisWidth": 40,
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".* request$"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    10,
+                    10
+                  ]
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "none"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".* limit$"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    10,
+                    10
+                  ]
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "none"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "sortBy": "Max",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (namespace, pod, node) (container_memory_working_set_bytes{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}) * on (namespace, pod) group_left () max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\", owner_name=~\"$workload\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\", pod=~\"$workload\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))",
+          "legendFormat": "{{pod}} on {{node}}"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "quantile by (namespace, owner_name) (0.5, sum by (namespace, pod) (kube_pod_container_resource_requests{namespace=~\"$namespace\", resource=\"memory\"}) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\", owner_name=~\"$workload\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\", pod=~\"$workload\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\")))",
+          "legendFormat": "{{owner_name}} request"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "quantile by (namespace, owner_name) (0.5, sum by (namespace, pod) (kube_pod_container_resource_limits{namespace=~\"$namespace\", resource=\"memory\"}) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\", owner_name=~\"$workload\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\", pod=~\"$workload\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\")))",
+          "legendFormat": "{{owner_name}} limit"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "CPU throttled per pod",
+      "description": "Share of CFS periods in which a pod's containers hit their CPU limit and were paused. Only containers with a CPU limit are throttled, so pods without one show nothing.",
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 39
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "custom": {
+            "axisWidth": 40,
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "sortBy": "Max",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (namespace, pod, node) (rate(container_cpu_cfs_throttled_periods_total{namespace=~\"$namespace\", container!=\"\"}[$__rate_interval])) / sum by (namespace, pod, node) (rate(container_cpu_cfs_periods_total{namespace=~\"$namespace\", container!=\"\"}[$__rate_interval])) * on (namespace, pod) group_left () max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\", owner_name=~\"$workload\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\", pod=~\"$workload\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))",
+          "legendFormat": "{{pod}} on {{node}}"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Restarts per pod",
+      "description": "Container restarts of each pod per interval, from kube-state-metrics.",
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 8,
+        "y": 39
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "axisWidth": 40,
+            "drawStyle": "bars",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 100,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "axisLabel": "restarts"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "sum"
+          ],
+          "sortBy": "Total",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (namespace, pod) (increase(kube_pod_container_status_restarts_total{namespace=~\"$namespace\"}[$__rate_interval])) * on (namespace, pod) group_left () max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\", owner_name=~\"$workload\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\", pod=~\"$workload\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))",
+          "legendFormat": "{{pod}}",
+          "interval": "1m"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "table",
+      "title": "Last termination",
+      "description": "Why and when each container of the selected workloads' pods last stopped, from kube-state-metrics. Unknown usually means its node restarted.",
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 39
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max by (pod, container, reason) (kube_pod_container_status_last_terminated_timestamp{namespace=~\"$namespace\"} * 1000 * on (namespace, pod, container) group_left (reason) kube_pod_container_status_last_terminated_reason{namespace=~\"$namespace\"} * on (namespace, pod) group_left () max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\", owner_name=~\"$workload\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\", pod=~\"$workload\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\")))",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeFromNow"
+              },
+              {
+                "id": "displayName",
+                "value": "When"
+              }
+            ]
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Value",
+                "desc": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "Value": 0,
+              "pod": 1,
+              "container": 2,
+              "reason": 3
+            },
+            "renameByName": {
+              "pod": "Pod",
+              "container": "Container",
+              "reason": "Reason"
+            }
+          }
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "When",
+            "desc": true
+          }
+        ]
+      }
+    }
+  ]
+}
