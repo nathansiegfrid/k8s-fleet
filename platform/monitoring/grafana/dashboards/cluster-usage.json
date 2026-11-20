@@ -815,7 +815,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (namespace, pod) (increase(kube_pod_container_status_restarts_total{namespace=~\"$namespace\"}[$__rate_interval])) * on (namespace, pod) group_left () max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\", owner_name=~\"$workload\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\", pod=~\"$workload\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))",
+          "expr": "sum by (namespace, pod) (kube_pod_container_status_restarts_total{namespace=~\"$namespace\"} - kube_pod_container_status_restarts_total{namespace=~\"$namespace\"} offset $__interval) * on (namespace, pod) group_left () max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\", owner_name=~\"$workload\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\", pod=~\"$workload\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))",
           "legendFormat": "{{pod}}",
           "interval": "1m"
         }
