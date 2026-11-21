@@ -50,6 +50,28 @@
         "options": [],
         "regex": "",
         "hide": 0
+      },
+      {
+        "type": "switch",
+        "name": "show_inactive",
+        "label": "Show inactive workloads",
+        "description": "Show workloads with no pods at the range's end, such as replaced ReplicaSets.",
+        "hide": 0,
+        "skipUrlSync": false,
+        "current": {
+          "value": "1",
+          "text": "1"
+        },
+        "options": [
+          {
+            "value": "1",
+            "text": "1"
+          },
+          {
+            "value": "0",
+            "text": "0"
+          }
+        ]
       }
     ]
   },
@@ -426,7 +448,7 @@
       "id": 1,
       "type": "table",
       "title": "Requests against use, per workload",
-      "description": "Each workload's use over the time range, against its requests. CPU is the 90th percentile and memory the peak. A ratio is blue below 25%, and orange for CPU or red for memory above 100%. Requests and limits are the last in the time range, and Pods is the count at its end. A workload without a request shows none.",
+      "description": "Each workload's use over the time range, against its requests. CPU is the 90th percentile and memory the peak. A ratio is blue below 25%, and orange for CPU or red for memory above 100%. Requests and limits are the last in the time range, and Pods is the count at its end, and a workload with none is dimmed. A workload without a request shows none.",
       "gridPos": {
         "h": 22,
         "w": 24,
@@ -444,7 +466,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))) or 0 * last_over_time((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])",
+          "expr": "(count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))) or 0 * last_over_time((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) unless on (namespace, owner_name) (((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))) or 0 * last_over_time((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) == 0) >= $show_inactive)",
           "legendFormat": "",
           "instant": true,
           "range": false,
@@ -456,7 +478,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "1000 * (avg_over_time((sum by (namespace, owner_name) (sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}[2m])) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m]))",
+          "expr": "(1000 * (avg_over_time((sum by (namespace, owner_name) (sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}[2m])) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m]))) unless on (namespace, owner_name) (((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))) or 0 * last_over_time((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) == 0) >= $show_inactive)",
           "legendFormat": "",
           "instant": true,
           "range": false,
@@ -468,7 +490,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "1000 * (quantile_over_time(0.9, (sum by (namespace, owner_name) (sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}[2m])) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m]))",
+          "expr": "(1000 * (quantile_over_time(0.9, (sum by (namespace, owner_name) (sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}[2m])) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m]))) unless on (namespace, owner_name) (((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))) or 0 * last_over_time((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) == 0) >= $show_inactive)",
           "legendFormat": "",
           "instant": true,
           "range": false,
@@ -480,7 +502,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "1000 * last_over_time((sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])",
+          "expr": "(1000 * last_over_time((sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) unless on (namespace, owner_name) (((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))) or 0 * last_over_time((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) == 0) >= $show_inactive)",
           "legendFormat": "",
           "instant": true,
           "range": false,
@@ -492,7 +514,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "1000 * last_over_time((sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_limits{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_limits{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])",
+          "expr": "(1000 * last_over_time((sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_limits{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_limits{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) unless on (namespace, owner_name) (((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))) or 0 * last_over_time((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) == 0) >= $show_inactive)",
           "legendFormat": "",
           "instant": true,
           "range": false,
@@ -504,7 +526,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "quantile_over_time(0.9, (sum by (namespace, owner_name) (sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}[2m])) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m]) / last_over_time((sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])",
+          "expr": "(quantile_over_time(0.9, (sum by (namespace, owner_name) (sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}[2m])) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m]) / last_over_time((sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) unless on (namespace, owner_name) (((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))) or 0 * last_over_time((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) == 0) >= $show_inactive)",
           "legendFormat": "",
           "instant": true,
           "range": false,
@@ -516,7 +538,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "avg_over_time((sum by (namespace, owner_name) (sum by (namespace, pod) (container_memory_working_set_bytes{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])",
+          "expr": "(avg_over_time((sum by (namespace, owner_name) (sum by (namespace, pod) (container_memory_working_set_bytes{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) unless on (namespace, owner_name) (((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))) or 0 * last_over_time((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) == 0) >= $show_inactive)",
           "legendFormat": "",
           "instant": true,
           "range": false,
@@ -528,7 +550,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "max_over_time((sum by (namespace, owner_name) (sum by (namespace, pod) (container_memory_working_set_bytes{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])",
+          "expr": "(max_over_time((sum by (namespace, owner_name) (sum by (namespace, pod) (container_memory_working_set_bytes{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) unless on (namespace, owner_name) (((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))) or 0 * last_over_time((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) == 0) >= $show_inactive)",
           "legendFormat": "",
           "instant": true,
           "range": false,
@@ -540,7 +562,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "last_over_time((sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])",
+          "expr": "(last_over_time((sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) unless on (namespace, owner_name) (((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))) or 0 * last_over_time((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) == 0) >= $show_inactive)",
           "legendFormat": "",
           "instant": true,
           "range": false,
@@ -552,7 +574,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "last_over_time((sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_limits{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_limits{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])",
+          "expr": "(last_over_time((sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_limits{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_limits{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) unless on (namespace, owner_name) (((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))) or 0 * last_over_time((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) == 0) >= $show_inactive)",
           "legendFormat": "",
           "instant": true,
           "range": false,
@@ -564,7 +586,19 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "max_over_time((sum by (namespace, owner_name) (sum by (namespace, pod) (container_memory_working_set_bytes{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m]) / last_over_time((sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])",
+          "expr": "(max_over_time((sum by (namespace, owner_name) (sum by (namespace, pod) (container_memory_working_set_bytes{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m]) / last_over_time((sum by (namespace, owner_name) (max by (namespace, pod, node) (label_replace(sum by (namespace, pod, node) (kube_pod_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"containers\", \"\", \"\") or label_replace(max by (namespace, pod, node) (kube_pod_init_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\"}), \"part\", \"init\", \"\", \"\")) * on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) unless on (namespace, owner_name) (((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))) or 0 * last_over_time((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) == 0) >= $show_inactive)",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "refId": "S",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(label_replace((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))) or 0 * last_over_time((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) == 0, \"style\", `{\"opacity\": 0.5}`, \"\", \"\")) unless on (namespace, owner_name) (((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))) or 0 * last_over_time((count by (namespace, owner_name) (max by (namespace, pod) (kube_pod_status_phase{namespace=~\"$namespace\", phase=~\"Pending|Running\"} == 1) * on (namespace, pod) group_left (owner_name) max by (namespace, pod, owner_name) (last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind!~\"|<none>\"}[5m]) or label_replace(last_over_time(kube_pod_owner{namespace=~\"$namespace\", owner_kind=~\"|<none>\"}[5m]), \"owner_name\", \"$1\", \"pod\", \"(.+)\"))))[$__range:1m])) == 0) >= $show_inactive)",
           "legendFormat": "",
           "instant": true,
           "range": false,
@@ -580,7 +614,8 @@
           "id": "organize",
           "options": {
             "excludeByName": {
-              "Time": true
+              "Time": true,
+              "Value #S": true
             },
             "indexByName": {
               "namespace": 0,
@@ -619,7 +654,8 @@
         "defaults": {
           "custom": {
             "align": "auto",
-            "filterable": true
+            "filterable": true,
+            "styleField": "style"
           }
         },
         "overrides": [
@@ -1166,6 +1202,30 @@
               {
                 "id": "custom.width",
                 "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "style"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Workload"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 300
               }
             ]
           }
