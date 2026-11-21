@@ -23,14 +23,200 @@
   },
   "panels": [
     {
+      "id": 5,
+      "type": "stat",
+      "title": "Alerts firing",
+      "description": "Alerts firing in Prometheus now, including ones Alertmanager inhibits.",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(count(ALERTS{alertstate=\"firing\"})) or vector(0)",
+          "legendFormat": "",
+          "instant": true,
+          "range": false
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "stat",
+      "title": "Alerts resolved",
+      "description": "Alerts that fired during the time range and aren't firing now. An alert that resolved and fired again counts as firing.",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(count(max_over_time(ALERTS{alertstate=\"firing\"}[$__range]) unless ALERTS{alertstate=\"firing\"})) or vector(0)",
+          "legendFormat": "",
+          "instant": true,
+          "range": false
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Targets down",
+      "description": "Scrape targets Prometheus can't reach now.",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(count(up == 0)) or vector(0)",
+          "legendFormat": "",
+          "instant": true,
+          "range": false
+        }
+      ]
+    },
+    {
       "id": 1,
       "type": "stat",
       "title": "Nodes not Ready",
       "description": "Nodes whose Ready condition isn't true.",
       "gridPos": {
         "h": 4,
-        "w": 5,
-        "x": 0,
+        "w": 4,
+        "x": 12,
         "y": 0
       },
       "datasource": {
@@ -91,8 +277,8 @@
       "description": "Pods pending, failed, unknown, terminating, running but not Ready, or with a container waiting, such as in CrashLoopBackOff or ImagePullBackOff. Each pod and reason counts once.",
       "gridPos": {
         "h": 4,
-        "w": 5,
-        "x": 5,
+        "w": 4,
+        "x": 16,
         "y": 0
       },
       "datasource": {
@@ -149,12 +335,12 @@
     {
       "id": 3,
       "type": "stat",
-      "title": "Restarts",
+      "title": "Pod restarts",
       "description": "Container restarts over the time range.",
       "gridPos": {
         "h": 4,
-        "w": 5,
-        "x": 10,
+        "w": 4,
+        "x": 20,
         "y": 0
       },
       "datasource": {
@@ -202,130 +388,6 @@
             "uid": "prometheus"
           },
           "expr": "(sum(sum by (namespace, pod) (increase(kube_pod_container_status_restarts_total[$__range])))) or vector(0)",
-          "legendFormat": "",
-          "instant": true,
-          "range": false
-        }
-      ]
-    },
-    {
-      "id": 4,
-      "type": "stat",
-      "title": "Targets down",
-      "description": "Scrape targets Prometheus can't reach now.",
-      "gridPos": {
-        "h": 4,
-        "w": 5,
-        "x": 15,
-        "y": 0
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "none",
-          "decimals": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "textMode": "value",
-        "justifyMode": "center",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        }
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "(count(up == 0)) or vector(0)",
-          "legendFormat": "",
-          "instant": true,
-          "range": false
-        }
-      ]
-    },
-    {
-      "id": 5,
-      "type": "stat",
-      "title": "Alerts firing",
-      "description": "Alerts firing in Prometheus now, including ones Alertmanager inhibits.",
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 20,
-        "y": 0
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "none",
-          "decimals": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "textMode": "value",
-        "justifyMode": "center",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        }
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "(count(ALERTS{alertstate=\"firing\"})) or vector(0)",
           "legendFormat": "",
           "instant": true,
           "range": false
@@ -408,7 +470,7 @@
       "title": "Pods with problems",
       "description": "Pods pending, failed, unknown, terminating or running but not Ready, and pods with a container waiting, with the reason. A pod can have a row for each. A pod stuck terminating on a node that isn't Ready is gone once the node is back, or deleted with --force.",
       "gridPos": {
-        "h": 9,
+        "h": 8,
         "w": 12,
         "x": 0,
         "y": 12
@@ -490,7 +552,7 @@
       "title": "Most restarts",
       "description": "The ten pods whose containers restarted most over the time range. The pods of a workload, and why they stopped, are in Cluster Usage.",
       "gridPos": {
-        "h": 9,
+        "h": 8,
         "w": 12,
         "x": 12,
         "y": 12
@@ -573,10 +635,10 @@
       "title": "Node problems",
       "description": "Nodes that aren't Ready, or report memory, disk or PID pressure, or no network.",
       "gridPos": {
-        "h": 7,
+        "h": 8,
         "w": 12,
         "x": 0,
-        "y": 21
+        "y": 20
       },
       "datasource": {
         "type": "prometheus",
@@ -649,10 +711,10 @@
       "title": "Targets down",
       "description": "Scrape targets Prometheus can't reach now: the exporter, or its node, is down.",
       "gridPos": {
-        "h": 7,
+        "h": 8,
         "w": 12,
         "x": 12,
-        "y": 21
+        "y": 20
       },
       "datasource": {
         "type": "prometheus",
