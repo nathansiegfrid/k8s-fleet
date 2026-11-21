@@ -41,7 +41,7 @@ server:
   resources:
     requests:
       cpu: 100m
-      memory: 512Mi
+      memory: 1Gi
     limits:
       memory: 2Gi
 
@@ -75,6 +75,11 @@ configmapReload:
       readOnlyRootFilesystem: true
       capabilities:
         drop: [ALL]
+
+    resources:
+      requests:
+        cpu: 1m
+        memory: 16Mi
 
 # The chart adds its own default jobs before ours; null removes them, so
 # this file holds every job Prometheus runs.

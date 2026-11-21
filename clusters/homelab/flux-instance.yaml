@@ -44,3 +44,35 @@ spec:
                   - key: node-role.kubernetes.io/control-plane
                     operator: Exists
                     effect: NoSchedule
+      - target:
+          kind: Deployment
+          name: kustomize-controller
+        patch: |
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: kustomize-controller
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: manager
+                    resources:
+                      requests:
+                        memory: 256Mi
+      - target:
+          kind: Deployment
+          name: source-controller
+        patch: |
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: source-controller
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: manager
+                    resources:
+                      requests:
+                        memory: 384Mi

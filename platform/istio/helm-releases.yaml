@@ -130,3 +130,11 @@ spec:
   releaseName: ztunnel
   targetNamespace: istio-system
   storageNamespace: istio-system
+
+  values:
+    # The chart requests 200m CPU and 512Mi per node. No memory limit: an OOM
+    # kill would cut the node's mesh traffic.
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
