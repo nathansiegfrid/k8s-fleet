@@ -33,7 +33,22 @@ spec:
       - key: node-role.kubernetes.io/control-plane
         operator: Exists
         effect: NoSchedule
+    # The masters have 2 CPUs, one controller mustn't take both.
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 1000m
+        memory: 256Mi
     webhook:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 96Mi
+        limits:
+          cpu: 1000m
+          memory: 256Mi
       nodeSelector:
         node-role.kubernetes.io/control-plane: "true"
       tolerations:
@@ -41,6 +56,13 @@ spec:
           operator: Exists
           effect: NoSchedule
     cainjector:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          cpu: 1000m
+          memory: 256Mi
       nodeSelector:
         node-role.kubernetes.io/control-plane: "true"
       tolerations:

@@ -1,0 +1,15 @@
+# RKE2 merges these values into its rke2-snapshot-controller HelmChart.
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: rke2-snapshot-controller
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    controller:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          memory: 128Mi

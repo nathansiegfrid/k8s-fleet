@@ -42,6 +42,15 @@ spec:
     registry: txt
     txtOwnerId: homelab
 
+    # The masters have 2 CPUs, one controller mustn't take both.
+    resources:
+      requests:
+        cpu: 10m
+        memory: 160Mi
+      limits:
+        cpu: 1000m
+        memory: 512Mi
+
     # Keep it on the masters, where tenants' pods can't run: its Cloudflare
     # token can rewrite every record in the zone.
     nodeSelector:

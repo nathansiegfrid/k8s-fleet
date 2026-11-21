@@ -1,6 +1,7 @@
-# Values for RKE2's bundled CoreDNS chart, which RKE2's own Helm controller
+# Values for the charts RKE2 bundles, which RKE2's own Helm controller
 # installs from the masters' manifests directory.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - helm-chart-config.yaml
+  - coredns.yaml
+  - snapshot-controller.yaml
