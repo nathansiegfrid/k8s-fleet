@@ -32,6 +32,9 @@ spec:
     grafana.ini:
       server:
         root_url: https://grafana.siegfrid.com
+      # Grafana opens on Cluster Health instead of its own home page.
+      dashboards:
+        default_home_dashboard_path: /var/lib/grafana/dashboards/homelab/cluster-health.json
 
     datasources:
       datasources.yaml:
