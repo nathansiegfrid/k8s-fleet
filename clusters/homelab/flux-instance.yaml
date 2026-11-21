@@ -44,6 +44,23 @@ spec:
                   - key: node-role.kubernetes.io/control-plane
                     operator: Exists
                     effect: NoSchedule
+      # CPU limit defaults to 2000m on "medium" clusters.
+      # The masters have 2 CPUs each, one controller mustn't take both.
+      - target:
+          kind: Deployment
+        patch: |
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: all
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: manager
+                    resources:
+                      limits:
+                        cpu: 1000m
       - target:
           kind: Deployment
           name: kustomize-controller

@@ -9,7 +9,9 @@ resources:
     cpu: 100m
     memory: 256Mi
   limits:
-    cpu: 2000m
+    # CPU limit defaults to 2000m.
+    # The masters have 2 CPUs, one controller mustn't take both.
+    cpu: 1000m
     memory: 1Gi
 
 # Keep Flux Operator on the control-plane nodes, where tenants' pods can't
