@@ -54,6 +54,9 @@ spec:
             access: proxy
             jsonData:
               implementation: prometheus
+              # Alerts from rules made in Grafana go here too, so this one
+              # Alertmanager routes, inhibits and silences every alert.
+              handleGrafanaManagedAlerts: true
 
     # Dashboards are the JSON files in dashboards/, which Grafana provisions
     # itself from a mounted ConfigMap. Git is the source: Grafana won't save
