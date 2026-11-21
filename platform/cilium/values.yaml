@@ -34,6 +34,13 @@ operator:
       cpu: 1000m
       memory: 512Mi
 
+# The agent on each node. No limits: throttling or an OOM kill would break
+# the node's networking.
+resources:
+  requests:
+    cpu: 50m
+    memory: 384Mi
+
 # Take pod CIDRs from Kubernetes (RKE2's 10.42.0.0/16). Cilium's default
 # 10.0.0.0/8 pool overlaps the WireGuard network.
 ipam:
