@@ -26,7 +26,7 @@
       "id": 5,
       "type": "stat",
       "title": "Alerts firing",
-      "description": "Alerts firing in Prometheus now, including ones Alertmanager inhibits.",
+      "description": "Alerts firing now, one per row of the Alerts timeline. A TargetDown is left out while its node isn't Ready, as Alertmanager inhibits it, and for 2 minutes either side.",
       "gridPos": {
         "h": 4,
         "w": 4,
@@ -77,7 +77,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "(count(ALERTS{alertstate=\"firing\"})) or vector(0)",
+          "expr": "(count(max by (alertname, subject, mountpoint) (label_replace(label_join(label_replace(label_replace(label_replace(label_join(label_replace((ALERTS{alertstate=\"firing\"} unless on (alertname, node) label_replace(max_over_time(ALERTS{alertname=\"NodeNotReady\", alertstate=\"firing\"}[4m] offset -2m), \"alertname\", \"TargetDown\", \"\", \"\")), \"subject\", \"$1\", \"instance\", \"(.+)\"), \"nspod\", \"/\", \"namespace\", \"pod\"), \"subject\", \"$1\", \"node\", \"(.+)\"), \"subject\", \"$1\", \"nspod\", \"(.+/.+)\"), \"subject\", \"$1\", \"rule_group\", \"(.+)\"), \"target\", \";\", \"alertname\", \"subject\", \"job\"), \"subject\", \"$1 $2\", \"target\", \"TargetDown;(.+);(.+)\")))) or vector(0)",
           "legendFormat": "",
           "instant": true,
           "range": false
@@ -88,7 +88,7 @@
       "id": 11,
       "type": "stat",
       "title": "Alerts resolved",
-      "description": "Alerts that fired during the time range and aren't firing now. An alert that resolved and fired again counts as firing.",
+      "description": "Alerts that fired during the time range and aren't firing now, one per row of the Alerts timeline. An alert that resolved and fired again counts as firing. A TargetDown is left out while its node isn't Ready, as Alertmanager inhibits it, and for 2 minutes either side.",
       "gridPos": {
         "h": 4,
         "w": 4,
@@ -139,7 +139,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "(count(max_over_time(ALERTS{alertstate=\"firing\"}[$__range]) unless ALERTS{alertstate=\"firing\"})) or vector(0)",
+          "expr": "(count(max_over_time((max by (alertname, subject, mountpoint) (label_replace(label_join(label_replace(label_replace(label_replace(label_join(label_replace((ALERTS{alertstate=\"firing\"} unless on (alertname, node) label_replace(max_over_time(ALERTS{alertname=\"NodeNotReady\", alertstate=\"firing\"}[4m] offset -2m), \"alertname\", \"TargetDown\", \"\", \"\")), \"subject\", \"$1\", \"instance\", \"(.+)\"), \"nspod\", \"/\", \"namespace\", \"pod\"), \"subject\", \"$1\", \"node\", \"(.+)\"), \"subject\", \"$1\", \"nspod\", \"(.+/.+)\"), \"subject\", \"$1\", \"rule_group\", \"(.+)\"), \"target\", \";\", \"alertname\", \"subject\", \"job\"), \"subject\", \"$1 $2\", \"target\", \"TargetDown;(.+);(.+)\")))[$__range:]) unless max by (alertname, subject, mountpoint) (label_replace(label_join(label_replace(label_replace(label_replace(label_join(label_replace((ALERTS{alertstate=\"firing\"} unless on (alertname, node) label_replace(max_over_time(ALERTS{alertname=\"NodeNotReady\", alertstate=\"firing\"}[4m] offset -2m), \"alertname\", \"TargetDown\", \"\", \"\")), \"subject\", \"$1\", \"instance\", \"(.+)\"), \"nspod\", \"/\", \"namespace\", \"pod\"), \"subject\", \"$1\", \"node\", \"(.+)\"), \"subject\", \"$1\", \"nspod\", \"(.+/.+)\"), \"subject\", \"$1\", \"rule_group\", \"(.+)\"), \"target\", \";\", \"alertname\", \"subject\", \"job\"), \"subject\", \"$1 $2\", \"target\", \"TargetDown;(.+);(.+)\")))) or vector(0)",
           "legendFormat": "",
           "instant": true,
           "range": false
@@ -398,7 +398,7 @@
       "id": 6,
       "type": "state-timeline",
       "title": "Alerts",
-      "description": "When each alert fired over the time range, as Prometheus sees it: an alert Alertmanager inhibits, such as TargetDown on a node that isn't Ready, shows here but isn't emailed.",
+      "description": "When each alert fired over the time range. A TargetDown is left out while its node isn't Ready, as Alertmanager inhibits it, and for 2 minutes either side.",
       "gridPos": {
         "h": 8,
         "w": 24,
@@ -459,7 +459,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "max by (alertname, subject, mountpoint) (label_replace(label_replace(label_replace(label_join(label_replace(ALERTS{alertstate=\"firing\"}, \"subject\", \"$1\", \"instance\", \"(.+)\"), \"nspod\", \"/\", \"namespace\", \"pod\"), \"subject\", \"$1\", \"node\", \"(.+)\"), \"subject\", \"$1\", \"nspod\", \"(.+/.+)\"), \"subject\", \"$1\", \"rule_group\", \"(.+)\"))",
+          "expr": "max by (alertname, subject, mountpoint) (label_replace(label_join(label_replace(label_replace(label_replace(label_join(label_replace((ALERTS{alertstate=\"firing\"} unless on (alertname, node) label_replace(max_over_time(ALERTS{alertname=\"NodeNotReady\", alertstate=\"firing\"}[4m] offset -2m), \"alertname\", \"TargetDown\", \"\", \"\")), \"subject\", \"$1\", \"instance\", \"(.+)\"), \"nspod\", \"/\", \"namespace\", \"pod\"), \"subject\", \"$1\", \"node\", \"(.+)\"), \"subject\", \"$1\", \"nspod\", \"(.+/.+)\"), \"subject\", \"$1\", \"rule_group\", \"(.+)\"), \"target\", \";\", \"alertname\", \"subject\", \"job\"), \"subject\", \"$1 $2\", \"target\", \"TargetDown;(.+);(.+)\"))",
           "legendFormat": "{{alertname}} {{subject}} {{mountpoint}}"
         }
       ]
