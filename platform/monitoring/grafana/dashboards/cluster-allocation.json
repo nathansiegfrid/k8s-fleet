@@ -68,7 +68,7 @@
         "x": 0,
         "y": 0
       },
-      "description": "CPU used now by the whole node, pods and system, as in Node Allocation, and requested and limited by running and pending pods, as a share of the Ready control-plane nodes' allocatable, whatever the namespace filter. A node that isn't Ready, and its pods, are left out: its capacity can't take pods. Limits may pass 100%: they're overcommitted. A pod without a limit adds nothing to it.",
+      "description": "CPU used by the whole nodes now, and requested and limited by running and pending pods, as a share of the Ready control-plane nodes' allocatable. Ignores the namespace filter. Limits can pass 100%.",
       "fieldConfig": {
         "defaults": {
           "unit": "percentunit",
@@ -160,7 +160,7 @@
         "x": 6,
         "y": 0
       },
-      "description": "CPU used now by the whole node, pods and system, as in Node Allocation, and requested and limited by running and pending pods, as a share of the Ready worker nodes' allocatable, whatever the namespace filter. A node that isn't Ready, and its pods, are left out: its capacity can't take pods. Limits may pass 100%: they're overcommitted. A pod without a limit adds nothing to it.",
+      "description": "CPU used by the whole nodes now, and requested and limited by running and pending pods, as a share of the Ready worker nodes' allocatable. Ignores the namespace filter. Limits can pass 100%.",
       "fieldConfig": {
         "defaults": {
           "unit": "percentunit",
@@ -252,7 +252,7 @@
         "x": 12,
         "y": 0
       },
-      "description": "Memory used now by the whole node, pods and system, as in Node Allocation, and requested and limited by running and pending pods, as a share of the Ready control-plane nodes' allocatable, whatever the namespace filter. A node that isn't Ready, and its pods, are left out: its capacity can't take pods. Limits may pass 100%: they're overcommitted. A pod without a limit adds nothing to it.",
+      "description": "Memory used by the whole nodes now, and requested and limited by running and pending pods, as a share of the Ready control-plane nodes' allocatable. Ignores the namespace filter. Limits can pass 100%.",
       "fieldConfig": {
         "defaults": {
           "unit": "percentunit",
@@ -344,7 +344,7 @@
         "x": 18,
         "y": 0
       },
-      "description": "Memory used now by the whole node, pods and system, as in Node Allocation, and requested and limited by running and pending pods, as a share of the Ready worker nodes' allocatable, whatever the namespace filter. A node that isn't Ready, and its pods, are left out: its capacity can't take pods. Limits may pass 100%: they're overcommitted. A pod without a limit adds nothing to it.",
+      "description": "Memory used by the whole nodes now, and requested and limited by running and pending pods, as a share of the Ready worker nodes' allocatable. Ignores the namespace filter. Limits can pass 100%.",
       "fieldConfig": {
         "defaults": {
           "unit": "percentunit",
@@ -426,7 +426,7 @@
       "id": 1,
       "type": "table",
       "title": "Requests against use, per workload",
-      "description": "What each workload in the selected namespaces used over the time range, at one-minute steps, against what it reserves. CPU is its 90th percentile, so a one-off spike such as a restart doesn't count; memory is its peak, since one peak above the request is enough to be evicted. The ratio is blue below 25%: it reserves far more than it uses. Above 100%, CPU is orange: it runs on spare CPU and slows when the node is busy. Memory is red: when the node runs short, its pods are evicted first. Requests and limits are the last a workload had in the time range, so a replaced ReplicaSet keeps its own; Pods is how many run at the range's end, 0 once it's gone. A workload without a request shows none: the scheduler counts it as zero. A request or limit counts its larger part, the containers or an init container, as the scheduler does.",
+      "description": "Each workload's use over the time range, against its requests. CPU is the 90th percentile and memory the peak. A ratio is blue below 25%, and orange for CPU or red for memory above 100%. Requests and limits are the last in the time range, and Pods is the count at its end. A workload without a request shows none.",
       "gridPos": {
         "h": 22,
         "w": 24,
@@ -672,6 +672,41 @@
               {
                 "id": "noValue",
                 "value": "none"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null+nan",
+                      "result": {
+                        "text": "none",
+                        "color": "rgba(128, 128, 128, 0.2)",
+                        "index": 0
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "transparent",
+                      "value": null
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
               }
             ]
           },
@@ -688,6 +723,45 @@
               {
                 "id": "decimals",
                 "value": 0
+              },
+              {
+                "id": "noValue",
+                "value": "none"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null+nan",
+                      "result": {
+                        "text": "none",
+                        "color": "rgba(128, 128, 128, 0.2)",
+                        "index": 0
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "transparent",
+                      "value": null
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
               }
             ]
           },
@@ -740,6 +814,41 @@
               {
                 "id": "noValue",
                 "value": "none"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null+nan",
+                      "result": {
+                        "text": "none",
+                        "color": "rgba(128, 128, 128, 0.2)",
+                        "index": 0
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "transparent",
+                      "value": null
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
               }
             ]
           },
@@ -756,6 +865,45 @@
               {
                 "id": "decimals",
                 "value": 1
+              },
+              {
+                "id": "noValue",
+                "value": "none"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null+nan",
+                      "result": {
+                        "text": "none",
+                        "color": "rgba(128, 128, 128, 0.2)",
+                        "index": 0
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "transparent",
+                      "value": null
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
               }
             ]
           },
@@ -799,6 +947,22 @@
                   "type": "color-background",
                   "mode": "basic"
                 }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null+nan",
+                      "result": {
+                        "text": "none",
+                        "color": "rgba(128, 128, 128, 0.2)",
+                        "index": 0
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -842,6 +1006,22 @@
                   "type": "color-background",
                   "mode": "basic"
                 }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null+nan",
+                      "result": {
+                        "text": "none",
+                        "color": "rgba(128, 128, 128, 0.2)",
+                        "index": 0
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
