@@ -6,6 +6,10 @@ metadata:
   name: tenants
   namespace: flux-system
 spec:
+  # Optional per tenant: `path` in the repository, `./` by default;
+  # `private: true` to clone with the deploy key in `<tenant>-git`; and
+  # `sops: true` to decrypt with the age key in `<tenant>-sops-age`. Both
+  # Secrets are in this namespace, SOPS-encrypted in this folder.
   inputs:
     - tenant: tenant-01
       repository: https://github.com/nathansiegfrid/k8s-apps
@@ -50,31 +54,66 @@ spec:
           name: flux
           namespace: << inputs.tenant >>
 
-    - apiVersion: source.toolkit.fluxcd.io/v1
-      kind: GitRepository
-      metadata:
+  # The sync, in a template so each tenant's optional parts are left out
+  # when unset.
+  resourcesTemplate: |
+    ---
+    apiVersion: source.toolkit.fluxcd.io/v1
+    kind: GitRepository
+    metadata:
+      name: apps
+      namespace: << inputs.tenant >>
+    spec:
+      interval: 5m
+      url: << inputs.repository >>
+      ref:
+        branch: << inputs.branch >>
+      <<- if get inputs "private" >>
+      secretRef:
+        name: apps-git
+      <<- end >>
+    ---
+    apiVersion: kustomize.toolkit.fluxcd.io/v1
+    kind: Kustomization
+    metadata:
+      name: apps
+      namespace: << inputs.tenant >>
+    spec:
+      serviceAccountName: flux
+      targetNamespace: << inputs.tenant >>
+      interval: 10m
+      sourceRef:
+        kind: GitRepository
         name: apps
-        namespace: << inputs.tenant >>
-      spec:
-        interval: 5m
-        url: << inputs.repository >>
-        ref:
-          branch: << inputs.branch >>
-
-    - apiVersion: kustomize.toolkit.fluxcd.io/v1
-      kind: Kustomization
-      metadata:
-        name: apps
-        namespace: << inputs.tenant >>
-      spec:
-        serviceAccountName: flux
-        targetNamespace: << inputs.tenant >>
-        interval: 10m
-        sourceRef:
-          kind: GitRepository
-          name: apps
-        path: ./
-        prune: true
-        # Leave the tenant's workloads running if this Kustomization is
-        # deleted, e.g. when the tenant is removed from `inputs`.
-        deletionPolicy: Orphan
+      path: << get inputs "path" | default "./" >>
+      prune: true
+      # Leave the tenant's workloads running if this Kustomization is
+      # deleted, e.g. when the tenant is removed from `inputs`.
+      deletionPolicy: Orphan
+      <<- if get inputs "sops" >>
+      decryption:
+        provider: sops
+        secretRef:
+          name: sops-age
+      <<- end >>
+    <<- if get inputs "private" >>
+    ---
+    # Copied from flux-system, which exists before the tenant's namespace.
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: apps-git
+      namespace: << inputs.tenant >>
+      annotations:
+        fluxcd.controlplane.io/copyFrom: flux-system/<< inputs.tenant >>-git
+    <<- end >>
+    <<- if get inputs "sops" >>
+    ---
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: sops-age
+      namespace: << inputs.tenant >>
+      annotations:
+        fluxcd.controlplane.io/copyFrom: flux-system/<< inputs.tenant >>-sops-age
+    <<- end >>
