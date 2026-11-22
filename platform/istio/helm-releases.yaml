@@ -1,5 +1,6 @@
-# Istio in ambient mode: four charts on the same version, installed in this
-# order. Bump them together.
+# Istio in ambient mode: four charts on the same version. Bump them together.
+# Each waits for the one before it, in Istio's upgrade order: base, istiod,
+# then CNI and ztunnel, which must never be newer than istiod.
 #
 # Upgrades are in place. A revisioned istiod would allow a canary upgrade,
 # but Flux can't run one: renaming the HelmRelease uninstalls the old istiod
@@ -35,34 +36,6 @@ spec:
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: istio-cni
-  namespace: flux-system
-spec:
-  serviceAccountName: helm-controller
-  interval: 1h
-  timeout: 5m
-
-  dependsOn:
-    - name: istio-base
-
-  chart:
-    spec:
-      chart: cni
-      version: "1.31.4"
-      sourceRef:
-        kind: HelmRepository
-        name: istio
-  releaseName: istio-cni
-  targetNamespace: istio-system
-  storageNamespace: istio-system
-
-  values:
-    profile: ambient
-
----
-apiVersion: helm.toolkit.fluxcd.io/v2
-kind: HelmRelease
-metadata:
   name: istiod
   namespace: flux-system
 spec:
@@ -71,7 +44,7 @@ spec:
   timeout: 5m
 
   dependsOn:
-    - name: istio-cni
+    - name: istio-base
 
   chart:
     spec:
@@ -110,7 +83,7 @@ spec:
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: ztunnel
+  name: istio-cni
   namespace: flux-system
 spec:
   serviceAccountName: helm-controller
@@ -119,6 +92,34 @@ spec:
 
   dependsOn:
     - name: istiod
+
+  chart:
+    spec:
+      chart: cni
+      version: "1.31.4"
+      sourceRef:
+        kind: HelmRepository
+        name: istio
+  releaseName: istio-cni
+  targetNamespace: istio-system
+  storageNamespace: istio-system
+
+  values:
+    profile: ambient
+
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ztunnel
+  namespace: flux-system
+spec:
+  serviceAccountName: helm-controller
+  interval: 1h
+  timeout: 5m
+
+  dependsOn:
+    - name: istio-cni
 
   chart:
     spec:
