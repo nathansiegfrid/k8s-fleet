@@ -21,3 +21,9 @@ spec:
   path: ./tenants
   prune: true
   wait: true
+
+  # Each tenant's deploy key and age key are SOPS-encrypted in git.
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age

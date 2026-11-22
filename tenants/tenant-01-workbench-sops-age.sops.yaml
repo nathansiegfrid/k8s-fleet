@@ -1,0 +1,35 @@
+# tenant-01-workbench's own age key, which decrypts only its repository's
+# secrets. The tenants ResourceSet copies it into tenant-01-workbench as
+# `sops-age`.
+apiVersion: v1
+kind: Secret
+metadata:
+    name: tenant-01-workbench-sops-age
+    namespace: flux-system
+type: Opaque
+stringData:
+    age.agekey: ENC[AES256_GCM,data:fRFmDJO67yB9X/J3OSM+rUSx5XXT4Rg6NfCBAuJSnOrAa3fuEXvtYOnGsQv9LIpCVh3VdZq8RIeZM4/ZPLLvEW0/NhZV6TrUlsD0,iv:jfVi7FooKX8ELEjYyYenUUeqsP35n8z071OQMF1qRb0=,tag:/rd+rN8MYcnLtPY0qcp9sA==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBCUnczR1dMazZicXZIUTJi
+            UVpwNllab1VBbEpqUEIxSVd4N01KQ0NPRmtNCko4QmxWWEcxQWZTQUxDTllZeUlG
+            emFvR2grREJNMDZ5QlNXODlXNlhBZ3cKLS0tIGNPUmFtanJIVHpST3M2YlM0ZUJK
+            RWFiWFRXaDNrMEltaDlBYVRIRFpFR1EK52OwFAj4tH3AczlmPUWcpl5lePvH2Tq2
+            pkUHfJj0Zprp8bgFSuapZLpAuuLJhOUYM7MoHUQ63zTQFWp+/cuA3w==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age14ffhzy8v4ed9kr0fertclh3tvevppa7ygxl5gkep8h7w8ys8ny3scnsqsf
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBtVGhIVHQ5bGlWV3Y1VmRM
+            SEg0NHJ5bEZNcUcwOG4rL2hpS0RCek1KTVYwCkdHY2dZUmMreHRZLzR6eWhld3lZ
+            S1p4YU5ENWNYY3kzUndPaWlteTVOSk0KLS0tIDQ0NDZjWFpwWEgwanVLaWkwUVJK
+            Q0tSZFRORnZwdnBGM1JCYWdlYUUydGcKS2GYp65Qh0xMBjJbUuerMAz5QyXuLNuF
+            LLawQeKwUzfCxHbYipBsddZhth3+sMS1hC72fZ3Ep/ZwTMPfiu3RRg==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1t3f664zrvst5vgwvum90pdpllw85dc9h56v7yl6dg443aaw7ng4s7uhgd0
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-22T17:38:05Z"
+    mac: ENC[AES256_GCM,data:T2cTnkoPVPWFV+K1CbA68O8qRI+HMJsVSUAgUM+tm6jOQKQPkDYk4WTlZtkGc93lJ5e2FwGfCNP3Up0m5/9tSJ/9luh1rxGfSwufLnNzzZ4SsF7fzMg7l5i0LxS8giiU0GSTLacoAqVbuGalDSGcbDR1XKwn52zfnvsCveOflME=,iv:RLn+BrYQ5fLe+QAScl8b5wdWMIyePClPqtqlsCa/dTo=,tag:nJLjInTUhVIDYn7/aXNI+g==,type:str]
+    version: 3.13.3

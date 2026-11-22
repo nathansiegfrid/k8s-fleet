@@ -30,7 +30,7 @@ spec:
         mode: Terminate
         certificateRefs:
           - name: public-tls
-      # Platform namespaces only: tenants publish through the public Gateway.
+      # Limited to platform and admin namespaces.
       allowedRoutes:
         namespaces:
           from: Selector
@@ -38,7 +38,7 @@ spec:
             matchExpressions:
               - key: kubernetes.io/metadata.name
                 operator: In
-                values: [monitoring]
+                values: [monitoring, tenant-01-workbench]
 
 ---
 # Istio overlays these on the Service and Deployment it generates.

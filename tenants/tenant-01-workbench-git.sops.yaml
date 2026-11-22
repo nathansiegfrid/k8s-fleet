@@ -1,0 +1,36 @@
+# tenant-01-workbench's read-only deploy key for its private repository.
+# The tenants ResourceSet copies it into tenant-01-workbench as `apps-git`.
+apiVersion: v1
+kind: Secret
+metadata:
+    name: tenant-01-workbench-git
+    namespace: flux-system
+type: Opaque
+stringData:
+    identity: ENC[AES256_GCM,data:hsdykccZff/OK6g0qb3UEQlpjO7VwQIxRRFDdniRLBcTE7S30Gkk15OuuQRJARGsTy8tO1RSKlj9MecVtv7BCQMK3SWmhuGPjl0CpLkK38RZ/3a5UpJfqZhImugKRy+eUNxakYL5ywI2/Qc+UiykNvJOiDDXLAWPyKSz7OKrqD9Jr98dVzKsk/5VrJyAo/QPHXmpVjDmH9N2OeAr6QdyX6pKKGi2os3gz2px4ML28hFErN2v7VdHk3dXxgafAVBXuVafDTV6n/gwSngCiCh/FNDrky7I4zjK2chWedjy0zxMUUMq02mreHzBm4R9MUP7Jg+pFn5CmB6iNHvAWwyW9UpiGKmaxkFMlA0/yUVdIEJ9oPVyeMQXqcFtF35VeyQl5p0UUuYtgvMuIKTlNnV1+UYKWAtK5BhiFfvoiztsU3aDOBfA0hzHyRGP87VIKZD6cuLs1ThwvlaE24+Hu5Z8g8RhIkL4qf5HTOiOhRFMcK4W6NU4lIx7slkFAK6kTRI2oDU9atDID/BJnyS1cppHyD2f1d+DR6YRkQkh6hHdOSqN0Bk=,iv:gKrvifOeFBgiRvdB/xrntP8PIpMViMKVbWlKtVo76jA=,tag:qmkC1tTF+vBmKUgMicQNuQ==,type:str]
+    identity.pub: ENC[AES256_GCM,data:16ffFitKFCsXT2GDZEWoEoT9v359ewCypMHbB8Ydj/AgOTznQh8sSaQuCCrAdfRcIH5j9n2H7h89IvNY+3xCJJ6xyiBwWaZ7zL62EqcoRgPk4wzNOSfIM7gCvB7lfWsLHMnWiLl9fb+Kuw==,iv:qEVQ1wWo9CeRJE/MhhRtSCyUxe79Hl+m4SIfmFisfRw=,tag:sg4WYa1szPg1wUtdML9JuA==,type:str]
+    known_hosts: ENC[AES256_GCM,data:4LOM/pbP2sPTs+TGsjx19MyG/8EIpJl8eDi44y/cj0caioUERPmDzS+ongGKgwU7xVuHRZZi+lA3aO7ftg4Fy4Fa2KmaV7BQYO/iAEhs8WrmWiQ8F30YTGtcIg6RdwfqbImhnV72A2q/2VnOVJKDeVw8OKC0RgA6l9OcGSOjhpI3u9d+LLhnX6A1rPSQ5bLrEULEzbbWzLEKaQy1hZeXq2rMVWixsIdJz+f/ruVYShto5FQ1AnAEY5WfvSQSmBxQYc8HwbmATr4BNbQdZ5r3A94q3CEf4k5iKYV1B19o0EgGEq3jthUK2mWTZkqiGWD3t9FtmWAjLnW6RcKqJFNayiYKoj8F2qyoy7MJN8/TRlmTZuG4EC70TwBsOAPAc90A7R8KWqhPjBxXeqfsCc5jLGKmGsOxVGKsU2zCPEdCuOFOz+jyw+QwYm36i1hrA9ZVWpe64qOwe32ciqL6SNpGXV12mA/yv7KeG16yd4w/yNINzfkVoYTUv1Ob+7FqP/RO8TdQfbdfGhvqjk1Cl+M3wwZAtOwyXbN8mTc+rFnC9bwkEPfzFWVzWU1Mm7++m9FW7RPB7yh9Qmn9j1IueB611xF6QGV2I4tIC6mdh3KsIa9U8DZNGNl1Sacaq4M3FL11b6R6jDV+anNswZIK9pG7HeFyro8eRbNJT5SNKeWOjysmkXnJF0iCHBvu/y0Fon4+JM41ZarmVnsL+7ggPo4FaTx+BbqqrI6+dMjy/rdgCcZWpDdvlVyOioKaZ4PuPQqXkC3nLl+RRahiuTohn+wNytFWoqAh0EjhGCiliuPqiEJ7BHDA6uib1xPfL+YRGjUh0wNmUB4rV8WzGV/ZA5yifdOPOoE3PxbApmMlCKJ8ppXIdyev74BOoa/IDkbypT8dtAhdGrPHcjjjkGgSUp74zm7JIK5U0/iUUmyXYUraNVDK0zoFmk7sGEfsOo3c+LwrBrWUc5uL60hVDcI2ev04Lx0MaOwg1T76E7xaHLJSYpSyGg+G8Wavf0NTmkhnZclDrzUfpCcM5CGKc+4z1PXynkXM5LWn1MnJvm+6f2GX0crGf4Sg8L2ZTeB6u98e3JoGeuLZZ5D6K0831telfkyNy9aBnHFpz2E9gqPYWJkqLk4X0WYqg2CRF6CpoaBIPiTqMVvgfP0w/dortvcIaf7LzmkP6kBqlC6Sgcj/oqz+hqedU3nyK2yWUoxoqI+EM4BkZs9JWq8FZsjpqwOmW46d,iv:ZL7I3ZtKv8Z+IiNF37sckMoI7yyZ4epL/RFISrpcVFU=,tag:Y+MHBzcvGsd1t3Js8qTlLA==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB3K0k3eC80ZGt6RW9KNWxE
+            V2gzVThQcVZJbUkrQk5BRTZpK0p4TStMNEJVCjcyYnR4QVpadmsxVmVKTG1pdVpJ
+            ODlUMUNZaE5oWE5Va21vVUlUa2g1aFUKLS0tIHYwdytiUHVqc0xqMVdZTlRuaWlv
+            QlpRV2RPekpncUNTSGxNOUFYSTVXNDgKLQf5PXu4Aq5w7ZEf+M5hlZhjvP4XuSho
+            2wNryXPsHlcV/OCG0KkuR6FnPLB811tEhP6XchDT+sX0gECsH3GZWg==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age14ffhzy8v4ed9kr0fertclh3tvevppa7ygxl5gkep8h7w8ys8ny3scnsqsf
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB0Vzg0UWVwWU1OODV5YjA3
+            Y2Q4bGh3dnBGNGV1WFRSdkdPdFp3ZGJiYmprCjB5NGIwMG9LM2VOUGx6TVpLSWZF
+            K1F0TitYNXFlZlc3VTNOQ3EwcjhyRXcKLS0tIGs3SXZqbVQ5WkthMGZZdnBHRnVS
+            ckJHYjY4ZmpPcFZjK3VNL0NFRVM3ckkKWux9tQX4n14MnjbQoUCZpP9osc//b6xo
+            bdrS4vnkT1uWyeQRX3THY+2KcEbRCULeIWRc6si4Zc4WlIy7TO10ag==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1t3f664zrvst5vgwvum90pdpllw85dc9h56v7yl6dg443aaw7ng4s7uhgd0
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-22T17:38:05Z"
+    mac: ENC[AES256_GCM,data:OWWoZQ2nLBlkeDEdgoaLoh/cTE6bUbRXW2SVvEKJIrVtkVg16ml62f4Z9PAHF1lJexhWwOkNXW+QXKjZbizAMMto0K87wWEZwUfC3+XRa5KPsZQUQnoPedtLHd36o+LRK7OLut62c1109Rewmgw9E/hxoNvIUeRwBPlefqLJpVw=,iv:2oBdEdwSBpQ0ZOotkkRZaJ2mBvu36EsgUD4wI60Hejw=,tag:hRZCalAsYpfkr4YsdiUa4Q==,type:str]
+    version: 3.13.3

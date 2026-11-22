@@ -14,6 +14,12 @@ spec:
     - tenant: tenant-01
       repository: https://github.com/nathansiegfrid/k8s-apps
       branch: main
+    - tenant: tenant-01-workbench
+      repository: ssh://git@github.com/nathansiegfrid/workbench
+      branch: main
+      path: ./deployments
+      private: true
+      sops: true
 
   resources:
     # Removing a tenant from `inputs` keeps its namespace and everything in
