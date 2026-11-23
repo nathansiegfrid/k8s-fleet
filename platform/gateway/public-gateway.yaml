@@ -69,6 +69,10 @@ data:
           maxUnavailable: 0
       template:
         spec:
+          # The rest of Pod Security's restricted level is in Istio's template.
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
           topologySpreadConstraints:
             - maxSkew: 1
               topologyKey: kubernetes.io/hostname
