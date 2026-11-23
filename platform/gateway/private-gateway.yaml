@@ -5,8 +5,8 @@ metadata:
   name: private-gateway
   namespace: gateway
   annotations:
-    # external-dns points its hostnames at the worker's WireGuard address.
-    external-dns.kubernetes.io/target: 10.0.0.11
+    # external-dns points its hostnames at the workers' WireGuard addresses.
+    external-dns.kubernetes.io/target: 10.0.0.11,10.0.0.12
 spec:
   gatewayClassName: istio
   infrastructure:
@@ -41,43 +41,54 @@ spec:
                 values: [monitoring, tenant-01-workbench]
 
 ---
-# Istio overlays these on the Service and Deployment it generates.
+# Istio overlays these on the resources it generates.
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: private-gateway
   namespace: gateway
 data:
+  # Each worker takes the traffic to its own WireGuard address, from the pool
+  # below, and serves it with its own Gateway pod, which keeps the client's IP.
   service: |
+    metadata:
+      annotations:
+        lbipam.cilium.io/ips: "10.0.0.11,10.0.0.12"
     spec:
-      type: ClusterIP
-  # Ports 80 and 443 on the WireGuard address only, so the old pod has to
-  # free them first.
+      type: LoadBalancer
+      allocateLoadBalancerNodePorts: false
+      externalTrafficPolicy: Local
+      # Envoy's status port stays off the WireGuard addresses.
+      ports:
+        - "$patch": delete
+          port: 15021
+  # One pod per worker. A rollout starts the new pods before stopping the old
+  # ones, so neither address is left without a pod.
   deployment: |
     spec:
+      replicas: 2
       strategy:
         rollingUpdate:
-          maxSurge: 0
-          maxUnavailable: 1
+          maxSurge: 100%
+          maxUnavailable: 0
       template:
         spec:
-          # The node that has the address below.
-          nodeSelector:
-            kubernetes.io/hostname: worker-sg11-hstgr
-          containers:
-            - name: istio-proxy
-              ports:
-                - containerPort: 80
-                  hostPort: 80
-                  hostIP: 10.0.0.11
-                  protocol: TCP
-                - containerPort: 443
-                  hostPort: 443
-                  hostIP: 10.0.0.11
-                  protocol: TCP
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              # Count only the workers: the empty masters would block every pod.
+              nodeTaintsPolicy: Honor
+              labelSelector:
+                matchLabels:
+                  gateway.networking.k8s.io/gateway-name: private-gateway
+  # A drain can't take both pods at once.
+  podDisruptionBudget: |
+    spec:
+      minAvailable: 1
 
 ---
-# hostPort traffic goes straight to the pod, so the host firewall doesn't
+# Load-balanced traffic goes straight to the pod, so the host firewall doesn't
 # see it: this keeps the Gateway to WireGuard clients, whatever reaches it.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -104,3 +115,18 @@ spec:
         - ports:
             - port: "15021"
               protocol: TCP
+
+---
+# The workers' own WireGuard addresses, so nothing needs to announce them.
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: private-gateway
+spec:
+  blocks:
+    - cidr: 10.0.0.11/32 # worker-sg11-hstgr
+    - cidr: 10.0.0.12/32 # worker-sg12-tc
+  serviceSelector:
+    matchLabels:
+      io.kubernetes.service.namespace: gateway
+      io.kubernetes.service.name: private-gateway-istio
