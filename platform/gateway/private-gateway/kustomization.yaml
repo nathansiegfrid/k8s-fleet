@@ -5,3 +5,5 @@ resources:
   - gateway-options.yaml
   - network-policy.yaml
   - ip-pool.yaml
+  - helm-release.yaml
+  - pdb.yaml

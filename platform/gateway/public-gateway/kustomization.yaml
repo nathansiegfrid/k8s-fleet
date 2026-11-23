@@ -4,3 +4,5 @@ resources:
   - gateway.yaml
   - gateway-options.yaml
   - ip-pool.yaml
+  - helm-release.yaml
+  - pdb.yaml
