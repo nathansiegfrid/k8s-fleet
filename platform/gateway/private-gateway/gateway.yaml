@@ -9,11 +9,10 @@ metadata:
     external-dns.kubernetes.io/target: 10.0.0.11,10.0.0.12
 spec:
   gatewayClassName: istio
-  infrastructure:
-    parametersRef:
-      group: ""
-      kind: ConfigMap
-      name: private-gateway
+  # The Service from helm-release.yaml, rather than one istiod generates.
+  addresses:
+    - type: Hostname
+      value: private-gateway.gateway.svc.cluster.local
   listeners:
     # Only the platform's redirect to HTTPS attaches here.
     - name: http

@@ -10,4 +10,4 @@ spec:
   serviceSelector:
     matchLabels:
       io.kubernetes.service.namespace: gateway
-      io.kubernetes.service.name: private-gateway-istio
+      io.kubernetes.service.name: private-gateway

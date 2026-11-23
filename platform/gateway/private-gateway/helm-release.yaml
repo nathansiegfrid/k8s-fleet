@@ -1,5 +1,5 @@
-# The Gateway's pods: one on each worker labelled for it in k8s-infra, and
-# its Service. Not linked to the Gateway yet, so they carry no traffic.
+# The Gateway's pods, one on each worker labelled for it in k8s-infra, and
+# the Service it links to.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -31,6 +31,9 @@ spec:
       siegfrid.com/private-gateway: "true"
     autoscaling:
       enabled: false
+    labels:
+      # Policies that target the Gateway find its pods by this label.
+      gateway.networking.k8s.io/gateway-name: private-gateway
     # Gateway API gives Envoy its certificates; it needs no Role for Secrets.
     rbac:
       enabled: false
@@ -41,8 +44,15 @@ spec:
           value: "0"
       seccompProfile:
         type: RuntimeDefault
+    # Each worker takes the traffic to its own WireGuard address, from
+    # ip-pool.yaml, and serves it with its own pod, which keeps the client's IP.
     service:
-      type: ClusterIP
+      type: LoadBalancer
+      allocateLoadBalancerNodePorts: false
+      externalTrafficPolicy: Local
+      annotations:
+        lbipam.cilium.io/ips: "10.0.0.11,10.0.0.12"
+      # Only 80 and 443: the chart's default adds Envoy's status port.
       ports:
         - name: http
           port: 80
