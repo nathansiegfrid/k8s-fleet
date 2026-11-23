@@ -26,7 +26,7 @@
       "groupName": "istio"
     },
     {
-      "description": "Gateway API stays at the version Istio is built against, so its pull request waits for approval in the Dependency Dashboard.",
+      "description": "Gateway API stays at the version Istio is built against, so its pull requests wait for approval in the Dependency Dashboard, with patches apart from minors.",
       "matchDatasources": [
         "git-tags",
         "github-tags"
@@ -34,7 +34,8 @@
       "matchPackageNames": [
         "/kubernetes-sigs/gateway-api/"
       ],
-      "dependencyDashboardApproval": true
+      "dependencyDashboardApproval": true,
+      "separateMinorPatch": true
     }
   ]
 }
