@@ -1,4 +1,5 @@
-# Istio in ambient mode: four charts on the same version. Bump them together.
+# Istio in ambient mode: four charts on the same version, and the Gateways'
+# chart in platform/gateway with them. Bump them together.
 # Each waits for the one before it, in Istio's upgrade order: base, istiod,
 # then CNI and ztunnel, which must never be newer than istiod.
 #

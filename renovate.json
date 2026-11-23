@@ -13,7 +13,7 @@
   },
   "packageRules": [
     {
-      "description": "Istio's four charts must stay on one version.",
+      "description": "Istio's charts, the Gateways' included, must stay on one version.",
       "matchDatasources": [
         "helm"
       ],
@@ -21,7 +21,8 @@
         "base",
         "cni",
         "istiod",
-        "ztunnel"
+        "ztunnel",
+        "gateway"
       ],
       "groupName": "istio"
     },
