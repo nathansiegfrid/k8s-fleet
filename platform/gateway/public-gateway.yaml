@@ -69,6 +69,8 @@ data:
             - maxSkew: 1
               topologyKey: kubernetes.io/hostname
               whenUnsatisfiable: DoNotSchedule
+              # Count only the workers: the empty masters would block every pod.
+              nodeTaintsPolicy: Honor
               labelSelector:
                 matchLabels:
                   gateway.networking.k8s.io/gateway-name: public-gateway
