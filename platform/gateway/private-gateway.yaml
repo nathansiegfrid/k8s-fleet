@@ -51,8 +51,8 @@ data:
   service: |
     spec:
       type: ClusterIP
-  # Ports 80 and 443 on the WireGuard address only. The public Gateway holds
-  # them on the public address, and the old pod has to free them first.
+  # Ports 80 and 443 on the WireGuard address only, so the old pod has to
+  # free them first.
   deployment: |
     spec:
       strategy:
