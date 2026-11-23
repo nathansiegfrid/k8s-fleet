@@ -54,6 +54,10 @@ data:
       type: LoadBalancer
       allocateLoadBalancerNodePorts: false
       externalTrafficPolicy: Local
+      # Envoy's status port stays off the public addresses.
+      ports:
+        - "$patch": delete
+          port: 15021
   # One pod per worker. A rollout starts the new pods before stopping the old
   # ones, so neither address is left without a pod.
   deployment: |
