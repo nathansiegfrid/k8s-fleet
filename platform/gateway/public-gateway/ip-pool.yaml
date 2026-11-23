@@ -1,0 +1,14 @@
+# The workers' own addresses, so nothing needs to announce them. The second
+# is a VPC address: Tencent translates the public IP to it.
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: public-gateway
+spec:
+  blocks:
+    - cidr: 156.67.221.137/32 # worker-sg11-hstgr
+    - cidr: 10.3.0.16/32 # worker-sg12-tc
+  serviceSelector:
+    matchLabels:
+      io.kubernetes.service.namespace: gateway
+      io.kubernetes.service.name: public-gateway-istio

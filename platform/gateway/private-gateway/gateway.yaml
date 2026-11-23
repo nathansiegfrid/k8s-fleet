@@ -1,0 +1,41 @@
+# A Gateway reachable only over the VPN, for platform UIs such as Grafana.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: private-gateway
+  namespace: gateway
+  annotations:
+    # external-dns points its hostnames at the workers' WireGuard addresses.
+    external-dns.kubernetes.io/target: 10.0.0.11,10.0.0.12
+spec:
+  gatewayClassName: istio
+  infrastructure:
+    parametersRef:
+      group: ""
+      kind: ConfigMap
+      name: private-gateway
+  listeners:
+    # Only the platform's redirect to HTTPS attaches here.
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.siegfrid.com"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: public-tls
+      # Limited to platform and admin namespaces.
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values: [monitoring, tenant-01-workbench]

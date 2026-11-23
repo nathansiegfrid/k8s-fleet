@@ -1,0 +1,37 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: public-gateway
+  namespace: gateway
+  annotations:
+    # external-dns points tenants' hostnames here, not at the Gateway's own
+    # addresses, which include a VPC address the internet can't reach.
+    external-dns.kubernetes.io/target: 156.67.221.137,101.32.127.208
+spec:
+  gatewayClassName: istio
+  infrastructure:
+    parametersRef:
+      group: ""
+      kind: ConfigMap
+      name: public-gateway
+  listeners:
+    # Only the platform's redirect to HTTPS attaches here.
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.siegfrid.com"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: public-tls
+      # Routes attach from any namespace, for any subdomain. Restrict this
+      # before a second tenant, who could claim the first one's hostname.
+      allowedRoutes:
+        namespaces:
+          from: All

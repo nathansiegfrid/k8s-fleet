@@ -1,0 +1,13 @@
+# The workers' own WireGuard addresses, so nothing needs to announce them.
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: private-gateway
+spec:
+  blocks:
+    - cidr: 10.0.0.11/32 # worker-sg11-hstgr
+    - cidr: 10.0.0.12/32 # worker-sg12-tc
+  serviceSelector:
+    matchLabels:
+      io.kubernetes.service.namespace: gateway
+      io.kubernetes.service.name: private-gateway-istio
