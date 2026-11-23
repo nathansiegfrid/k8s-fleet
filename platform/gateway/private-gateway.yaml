@@ -77,15 +77,24 @@ data:
           securityContext:
             seccompProfile:
               type: RuntimeDefault
-          topologySpreadConstraints:
-            - maxSkew: 1
-              topologyKey: kubernetes.io/hostname
-              whenUnsatisfiable: DoNotSchedule
-              # Count only the workers: the empty masters would block every pod.
-              nodeTaintsPolicy: Honor
-              labelSelector:
-                matchLabels:
-                  gateway.networking.k8s.io/gateway-name: private-gateway
+          affinity:
+            # Only the workers whose addresses are in the pool below.
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: kubernetes.io/hostname
+                        operator: In
+                        values: [worker-sg11-hstgr, worker-sg12-tc]
+            # One pod of each rollout per node: a down worker's pod waits for it
+            # instead of doubling up on the other.
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - topologyKey: kubernetes.io/hostname
+                  labelSelector:
+                    matchLabels:
+                      gateway.networking.k8s.io/gateway-name: private-gateway
+                  matchLabelKeys: [pod-template-hash]
   # A drain can't take both pods at once.
   podDisruptionBudget: |
     spec:
