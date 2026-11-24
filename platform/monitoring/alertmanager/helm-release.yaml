@@ -47,6 +47,11 @@ spec:
         smtp_from: no-reply@notify.siegfrid.com
         smtp_auth_username: no-reply@notify.siegfrid.com
         smtp_auth_password_file: /etc/secrets/smtp/password
+        # Flux never sends "resolved" notifications, so Alertmanager has to
+        # time alerts out itself. A still-failing object reports again on each
+        # attempt: hourly for HelmReleases, plus however long a failed upgrade
+        # takes to time out, so reports can arrive more than an hour apart.
+        resolve_timeout: 1h30m
       route:
         receiver: email
         group_by: [alertname]

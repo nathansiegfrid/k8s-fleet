@@ -9,4 +9,5 @@ resources:
   - kube-state-metrics
   - prometheus
   - alertmanager
+  - flux-alerts
   - grafana
