@@ -11,6 +11,10 @@ spec:
       name: letsencrypt-account-key
     solvers:
       - dns01:
+          # Follow `_acme-challenge` CNAMEs when placing the TXT record. This lets
+          # domains with DNS hosted elsewhere delegate validation to siegfrid.com:
+          # CNAME `_acme-challenge.<domain>` to `<domain>.acme.siegfrid.com`.
+          cnameStrategy: Follow
           cloudflare:
             apiTokenSecretRef:
               name: cloudflare-api-token
