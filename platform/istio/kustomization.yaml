@@ -4,3 +4,5 @@ resources:
   - namespace.yaml
   - helm-repository.yaml
   - helm-releases.yaml
+  - network-policy.yaml
+  - ambient-probes.yaml

@@ -1,0 +1,17 @@
+# Ambient mode rewrites kubelet probes to come from 169.254.7.127, which
+# Cilium sees as `world`, so a default-deny policy would fail them. This
+# allows that address into ambient pods, and denies nothing by itself.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ambient-probes
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.cilium.k8s.namespace.labels.istio.io/dataplane-mode: ambient
+  enableDefaultDeny:
+    ingress: false
+    egress: false
+  ingress:
+    - fromCIDR:
+        - 169.254.7.127/32

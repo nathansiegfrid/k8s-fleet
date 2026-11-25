@@ -1,0 +1,37 @@
+# Pods here accept connections from this namespace only, plus the Gateways
+# and the API server calling istiod. Without it, any pod could read the
+# mesh's config, every Service and endpoint, from istiod's plaintext 15010.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default
+  namespace: istio-system
+spec:
+  endpointSelector: {}
+  ingress:
+    # A namespaced policy's selectors stay in its namespace, so `{}` means
+    # only this namespace's pods.
+    - fromEndpoints:
+        - {}
+    # The Gateways' pods get their config from istiod over mTLS.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: gateway
+          matchExpressions:
+            - key: gateway.networking.k8s.io/gateway-name
+              operator: Exists
+      toPorts:
+        - ports:
+            - port: "15012"
+              protocol: TCP
+    # The API server calls istiod's webhooks to check Istio's objects and to
+    # inject the Gateways' pods. From the other masters, the call comes from
+    # their pod-network address, not the API server's, so it doesn't match
+    # the `kube-apiserver` identity. Allow them by node instead.
+    - fromNodes:
+        - matchLabels:
+            node-role.kubernetes.io/control-plane: "true"
+      toPorts:
+        - ports:
+            - port: "15017"
+              protocol: TCP
