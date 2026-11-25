@@ -1,0 +1,37 @@
+# Anyone may reach 80 and 443. Envoy's other ports stay closed, so tenants
+# can't read each other's routes and status codes from its metrics.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: public-gateway
+  namespace: gateway
+spec:
+  endpointSelector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-name: public-gateway
+  ingress:
+    - fromEntities:
+        - all
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+            - port: "443"
+              protocol: TCP
+    # The kubelet's readiness probe on Envoy's status port.
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "15021"
+              protocol: TCP
+    # Prometheus scrapes Envoy's metrics, such as requests by status code.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: monitoring
+            app.kubernetes.io/name: prometheus
+            app.kubernetes.io/component: server
+      toPorts:
+        - ports:
+            - port: "15020"
+              protocol: TCP

@@ -6,3 +6,4 @@ resources:
   - ip-pool.yaml
   - helm-release.yaml
   - pdb.yaml
+  - network-policy.yaml
