@@ -5,8 +5,10 @@ metadata:
   name: private-gateway
   namespace: gateway
   annotations:
-    # external-dns points its hostnames at the workers' WireGuard addresses.
-    external-dns.kubernetes.io/target: 10.0.0.11,10.0.0.12
+    # external-dns creates a CNAME for each tenant hostname routed through
+    # this Gateway, pointing at private-gateway.siegfrid.com.
+    # The actual IPs are defined in dns-endpoint.yaml.
+    external-dns.kubernetes.io/target: private-gateway.siegfrid.com
 spec:
   gatewayClassName: istio
   # The Service from helm-release.yaml, rather than one istiod generates.

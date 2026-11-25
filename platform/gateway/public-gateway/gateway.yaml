@@ -4,9 +4,10 @@ metadata:
   name: public-gateway
   namespace: gateway
   annotations:
-    # external-dns points tenants' hostnames here, not at the Gateway's own
-    # addresses, which include a VPC address the internet can't reach.
-    external-dns.kubernetes.io/target: 156.67.221.137,101.32.127.208
+    # external-dns creates a CNAME for each tenant hostname routed through
+    # this Gateway, pointing at public-gateway.siegfrid.com.
+    # The actual IPs are defined in dns-endpoint.yaml.
+    external-dns.kubernetes.io/target: public-gateway.siegfrid.com
 spec:
   gatewayClassName: istio
   # The Service from helm-release.yaml, rather than one istiod generates.
