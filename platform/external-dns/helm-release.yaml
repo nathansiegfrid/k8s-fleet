@@ -30,13 +30,14 @@ spec:
             key: token
 
     sources:
-      # A record for each HTTPRoute hostname, pointing at its Gateway's
+      # A CNAME for each HTTPRoute hostname, pointing at its Gateway's
       # `external-dns.kubernetes.io/target` annotation.
       - gateway-httproute
       # The records written out in DNSEndpoints. Tenants can't create these.
       - crd
     domainFilters:
       - siegfrid.com
+      - siegfrid.org
 
     # Delete records whose route is gone, but only records this cluster
     # created: ownership is tracked in TXT records.
