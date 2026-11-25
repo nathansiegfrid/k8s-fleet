@@ -1,0 +1,15 @@
+# Pods here accept connections from this namespace only, so no other pod can
+# read the cluster's flows through Hubble Relay. The agents and operator use
+# the host network, which this doesn't touch.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default
+  namespace: cilium-system
+spec:
+  endpointSelector: {}
+  ingress:
+    # A namespaced policy's selectors stay in its namespace, so `{}` means
+    # only this namespace's pods.
+    - fromEndpoints:
+        - {}
