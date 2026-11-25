@@ -66,7 +66,7 @@ spec:
     - apiVersion: networking.k8s.io/v1
       kind: NetworkPolicy
       metadata:
-        name: default
+        name: default-network-policy
         namespace: << inputs.tenant >>
       spec:
         podSelector: {}

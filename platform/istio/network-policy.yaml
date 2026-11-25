@@ -1,33 +1,58 @@
 # Pods here accept connections from this namespace only, plus the Gateways
 # and the API server calling istiod. Without it, any pod could read the
 # mesh's config, every Service and endpoint, from istiod's plaintext 15010.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-network-policy
+  namespace: istio-system
+spec:
+  podSelector: {}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector: {}
+
+---
+# The Gateways' pods get their config from istiod over mTLS.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: istiod
+  namespace: istio-system
+spec:
+  podSelector:
+    matchLabels:
+      app: istiod
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: gateway
+          podSelector:
+            matchExpressions:
+              - key: gateway.networking.k8s.io/gateway-name
+                operator: Exists
+      ports:
+        - port: 15012
+          protocol: TCP
+
+---
+# The API server calls istiod's webhooks to check Istio's objects and to
+# inject the Gateways' pods. From the other masters, the call comes from
+# their pod-network address, not the API server's, so it doesn't match
+# the `kube-apiserver` identity. Allow them by node instead.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: default
+  name: istiod-webhook
   namespace: istio-system
 spec:
-  endpointSelector: {}
+  endpointSelector:
+    matchLabels:
+      app: istiod
   ingress:
-    # A namespaced policy's selectors stay in its namespace, so `{}` means
-    # only this namespace's pods.
-    - fromEndpoints:
-        - {}
-    # The Gateways' pods get their config from istiod over mTLS.
-    - fromEndpoints:
-        - matchLabels:
-            k8s:io.kubernetes.pod.namespace: gateway
-          matchExpressions:
-            - key: gateway.networking.k8s.io/gateway-name
-              operator: Exists
-      toPorts:
-        - ports:
-            - port: "15012"
-              protocol: TCP
-    # The API server calls istiod's webhooks to check Istio's objects and to
-    # inject the Gateways' pods. From the other masters, the call comes from
-    # their pod-network address, not the API server's, so it doesn't match
-    # the `kube-apiserver` identity. Allow them by node instead.
     - fromNodes:
         - matchLabels:
             node-role.kubernetes.io/control-plane: "true"
@@ -35,3 +60,24 @@ spec:
         - ports:
             - port: "15017"
               protocol: TCP
+
+---
+# Ambient mode rewrites kubelet probes to come from 169.254.7.127, which
+# Cilium sees as `world`. Clusterwide, since a namespaced policy can only
+# select its own namespace's pods, and ambient pods are in every tenant's.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: ambient-probes
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.cilium.k8s.namespace.labels.istio.io/dataplane-mode: ambient
+  # Allow the probes without making these pods default-deny, which any
+  # NetworkPolicy selecting them would.
+  enableDefaultDeny:
+    ingress: false
+    egress: false
+  ingress:
+    - fromCIDR:
+        - 169.254.7.127/32
