@@ -1,37 +1,33 @@
 # Load-balanced traffic goes straight to the pod, so the host firewall doesn't
 # see it: this keeps the Gateway to WireGuard clients, whatever reaches it.
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
 metadata:
   name: private-gateway
   namespace: gateway
 spec:
-  endpointSelector:
+  podSelector:
     matchLabels:
       gateway.networking.k8s.io/gateway-name: private-gateway
+  policyTypes: [Ingress]
   ingress:
-    - fromCIDR:
-        - 10.0.0.0/24
-      toPorts:
-        - ports:
-            - port: "80"
-              protocol: TCP
-            - port: "443"
-              protocol: TCP
-    # The kubelet's readiness probe on Envoy's status port.
-    - fromEntities:
-        - host
-      toPorts:
-        - ports:
-            - port: "15021"
-              protocol: TCP
+    - from:
+        - ipBlock:
+            cidr: 10.0.0.0/24
+      ports:
+        - port: 80
+          protocol: TCP
+        - port: 443
+          protocol: TCP
     # Prometheus scrapes Envoy's metrics, such as requests by status code.
-    - fromEndpoints:
-        - matchLabels:
-            k8s:io.kubernetes.pod.namespace: monitoring
-            app.kubernetes.io/name: prometheus
-            app.kubernetes.io/component: server
-      toPorts:
-        - ports:
-            - port: "15020"
-              protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: server
+      ports:
+        - port: 15020
+          protocol: TCP
