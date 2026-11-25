@@ -1,0 +1,14 @@
+# This Gateway's own name. Routes' records CNAME to it, and so can a tenant's
+# DNS hosted elsewhere. The workers' WireGuard addresses.
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: private-gateway
+  namespace: gateway
+spec:
+  endpoints:
+    - dnsName: private-gateway.siegfrid.com
+      recordType: A
+      targets:
+        - 10.0.0.11
+        - 10.0.0.12

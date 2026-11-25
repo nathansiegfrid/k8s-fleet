@@ -33,6 +33,8 @@ spec:
     # `external-dns.kubernetes.io/target` annotation: the worker's public IP.
     sources:
       - gateway-httproute
+      # The records written out in DNSEndpoints. Tenants can't create these.
+      - crd
     domainFilters:
       - siegfrid.com
 
