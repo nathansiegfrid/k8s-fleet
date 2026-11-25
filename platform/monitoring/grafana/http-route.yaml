@@ -7,9 +7,9 @@ spec:
   parentRefs:
     - name: private-gateway
       namespace: gateway
-      sectionName: https
+      sectionName: siegfrid-org
   hostnames:
-    - grafana.siegfrid.com
+    - grafana.siegfrid.org
   rules:
     - backendRefs:
         - name: grafana

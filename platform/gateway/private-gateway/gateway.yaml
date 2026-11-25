@@ -23,23 +23,6 @@ spec:
       allowedRoutes:
         namespaces:
           from: Same
-    - name: https
-      protocol: HTTPS
-      port: 443
-      hostname: "*.siegfrid.com"
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: siegfrid-com-tls
-      # Limited to platform and admin namespaces.
-      allowedRoutes:
-        namespaces:
-          from: Selector
-          selector:
-            matchExpressions:
-              - key: kubernetes.io/metadata.name
-                operator: In
-                values: [monitoring, tenant-01-workbench]
     - name: siegfrid-org
       protocol: HTTPS
       port: 443
@@ -56,5 +39,6 @@ spec:
               - key: kubernetes.io/metadata.name
                 operator: In
                 values:
+                  - monitoring
                   - tenant-01
                   - tenant-01-workbench

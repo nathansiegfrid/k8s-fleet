@@ -6,7 +6,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-url=${GRAFANA_URL:-https://grafana.siegfrid.com}
+url=${GRAFANA_URL:-https://grafana.siegfrid.org}
 folder=dashboard-previews
 
 # The dashboards are the JSON files in the grafana-dashboards ConfigMap, so

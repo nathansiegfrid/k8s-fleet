@@ -1,5 +1,5 @@
-# Grafana, reading Prometheus. Reached at grafana.siegfrid.com through the
-# private Gateway, so only over the VPN.
+# Grafana dashboards backed by Prometheus. Served at grafana.siegfrid.org
+# via the private Gateway, reachable only over the VPN.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -31,7 +31,7 @@ spec:
 
     grafana.ini:
       server:
-        root_url: https://grafana.siegfrid.com
+        root_url: https://grafana.siegfrid.org
       # Grafana opens on Cluster Health instead of its own home page.
       dashboards:
         default_home_dashboard_path: /var/lib/grafana/dashboards/homelab/cluster-health.json
