@@ -1,0 +1,25 @@
+# Pods here accept connections from this namespace only, plus the API server
+# calling the webhook.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default
+  namespace: cert-manager
+spec:
+  endpointSelector: {}
+  ingress:
+    # A namespaced policy's selectors stay in its namespace, so `{}` means
+    # only this namespace's pods.
+    - fromEndpoints:
+        - {}
+    # The API server calls the webhook to check cert-manager's objects. From
+    # the other masters, the call comes from their pod-network address, not
+    # the API server's, so it doesn't match the `kube-apiserver` identity.
+    # Allow them by node instead.
+    - fromNodes:
+        - matchLabels:
+            node-role.kubernetes.io/control-plane: "true"
+      toPorts:
+        - ports:
+            - port: "10250"
+              protocol: TCP
