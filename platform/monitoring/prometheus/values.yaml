@@ -175,3 +175,25 @@ serverFiles:
       - job_name: alertmanager
         static_configs:
           - targets: [alertmanager.monitoring.svc:9093]
+
+      # Each Gateway pod's Envoy: requests by status code and latency, for
+      # every route it serves. Found as pods in the gateway namespace.
+      - job_name: gateways
+        metrics_path: /stats/prometheus
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: [gateway]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_gateway_networking_k8s_io_gateway_name]
+            regex: .+
+            action: keep
+          - source_labels: [__meta_kubernetes_pod_ip]
+            replacement: ${1}:15020
+            target_label: __address__
+          - source_labels: [__meta_kubernetes_pod_label_gateway_networking_k8s_io_gateway_name]
+            target_label: gateway
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            target_label: node

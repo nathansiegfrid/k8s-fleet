@@ -25,3 +25,13 @@ spec:
         - ports:
             - port: "15021"
               protocol: TCP
+    # Prometheus scrapes Envoy's metrics, such as requests by status code.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: monitoring
+            app.kubernetes.io/name: prometheus
+            app.kubernetes.io/component: server
+      toPorts:
+        - ports:
+            - port: "15020"
+              protocol: TCP
