@@ -30,8 +30,11 @@ spec:
         mode: Terminate
         certificateRefs:
           - name: public-tls
-      # Routes attach from any namespace, for any subdomain. Restrict this
-      # before a second tenant, who could claim the first one's hostname.
       allowedRoutes:
         namespaces:
-          from: All
+          from: Selector
+          selector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values: [tenant-01]
