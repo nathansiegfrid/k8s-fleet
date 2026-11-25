@@ -1,0 +1,14 @@
+# Pods here accept connections from this namespace only. The provisioner
+# and its helper pods take no connections from outside it.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default
+  namespace: local-path-storage
+spec:
+  endpointSelector: {}
+  ingress:
+    # A namespaced policy's selectors stay in its namespace, so `{}` means
+    # only this namespace's pods.
+    - fromEndpoints:
+        - {}

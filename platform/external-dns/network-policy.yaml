@@ -1,0 +1,14 @@
+# Pods here accept connections from this namespace only. The only port is
+# external-dns's metrics, and nothing outside scrapes them.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default
+  namespace: external-dns
+spec:
+  endpointSelector: {}
+  ingress:
+    # A namespaced policy's selectors stay in its namespace, so `{}` means
+    # only this namespace's pods.
+    - fromEndpoints:
+        - {}
