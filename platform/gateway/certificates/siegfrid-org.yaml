@@ -1,0 +1,15 @@
+# siegfrid.org's DNS isn't managed here. Its `_acme-challenge` is a CNAME
+# into siegfrid.com, where the issuer writes the TXT record.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: siegfrid-org-tls
+  namespace: gateway
+spec:
+  secretName: siegfrid-org-tls
+  dnsNames:
+    - siegfrid.org
+    - "*.siegfrid.org"
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt
