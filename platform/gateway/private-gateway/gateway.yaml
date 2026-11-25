@@ -30,7 +30,7 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - name: public-tls
+          - name: siegfrid-com-tls
       # Limited to platform and admin namespaces.
       allowedRoutes:
         namespaces:

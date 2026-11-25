@@ -29,7 +29,7 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - name: public-tls
+          - name: siegfrid-com-tls
       allowedRoutes:
         namespaces:
           from: Selector

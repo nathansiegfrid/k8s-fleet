@@ -3,10 +3,10 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: public-tls
+  name: siegfrid-com-tls
   namespace: gateway
 spec:
-  secretName: public-tls
+  secretName: siegfrid-com-tls
   dnsNames:
     - "*.siegfrid.com"
   issuerRef:
