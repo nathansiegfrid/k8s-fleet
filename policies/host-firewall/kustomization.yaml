@@ -3,7 +3,6 @@
 #
 # Port references:
 # https://docs.rke2.io/install/requirements#inbound-network-rules
-# https://istio.io/latest/docs/ops/deployment/application-requirements/#ports-used-by-istio
 # https://docs.cilium.io/en/latest/security/policy/layer3/#entities-based
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
