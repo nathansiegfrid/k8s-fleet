@@ -10,12 +10,13 @@ metadata:
     external-dns.kubernetes.io/target: public-gateway.siegfrid.com
 spec:
   gatewayClassName: istio
-  # The Service from helm-release.yaml, rather than one istiod generates.
+  # Use the Service defined in helm-release.yaml instead of having istiod
+  # generate one.
   addresses:
     - type: Hostname
       value: public-gateway.gateway.svc.cluster.local
   listeners:
-    # Only the platform's redirect to HTTPS attaches here.
+    # Plain-HTTP listener. Only for HTTPS redirect (https-redirect.yaml).
     - name: http
       protocol: HTTP
       port: 80
