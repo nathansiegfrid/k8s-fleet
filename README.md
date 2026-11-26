@@ -49,7 +49,7 @@ Each tenant gets a fixed share of the workers: by default, 1 CPU of requests, 4G
 
 ### Leaving
 
-To remove a tenant, delete its entry from `inputs`. That stops its sync, but the namespace and everything running in it stay. Deleting the namespace is a separate step that someone has to take on purpose, so a typo in `tenants.yaml` can't destroy a tenant's data.
+To remove a tenant, delete its entry from `inputs`. That stops its sync, but the namespace and everything running in it stay, along with the network policy and quota. Deleting the namespace is a separate step that someone has to take on purpose, so a typo in `tenants.yaml` can't destroy a tenant's data.
 
 ## Security choices
 

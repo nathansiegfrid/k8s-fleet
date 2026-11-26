@@ -23,7 +23,8 @@ spec:
 
   resources:
     # Removing a tenant from `inputs` keeps its namespace and everything in
-    # it. Deleting the namespace is a separate, deliberate step.
+    # it, including the policy, quota and limits below that fence its pods in.
+    # Deleting the namespace is a separate, deliberate step.
     - apiVersion: v1
       kind: Namespace
       metadata:
@@ -69,6 +70,8 @@ spec:
       metadata:
         name: default-network-policy
         namespace: << inputs.tenant >>
+        annotations:
+          fluxcd.controlplane.io/prune: disabled
       spec:
         podSelector: {}
         policyTypes: [Ingress, Egress]
@@ -110,6 +113,8 @@ spec:
       metadata:
         name: default-resource-quota
         namespace: << inputs.tenant >>
+        annotations:
+          fluxcd.controlplane.io/prune: disabled
       spec:
         hard:
           requests.cpu: << get inputs "cpu" | default "1" >>
@@ -126,6 +131,8 @@ spec:
       metadata:
         name: default-limit-range
         namespace: << inputs.tenant >>
+        annotations:
+          fluxcd.controlplane.io/prune: disabled
       spec:
         limits:
           - type: Container
