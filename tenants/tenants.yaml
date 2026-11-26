@@ -103,6 +103,38 @@ spec:
               - port: 15008
                 protocol: TCP
 
+    # The tenant's share of the workers, which it can read but not change.
+    # Set `cpu`, `memory` or `storage` on a tenant in `inputs` to change it.
+    - apiVersion: v1
+      kind: ResourceQuota
+      metadata:
+        name: default-resource-quota
+        namespace: << inputs.tenant >>
+      spec:
+        hard:
+          requests.cpu: << get inputs "cpu" | default "1" >>
+          # Also caps memory requests, which can't exceed limits.
+          limits.memory: << get inputs "memory" | default "4Gi" >>
+          requests.storage: << get inputs "storage" | default "20Gi" >>
+          pods: "20"
+          persistentvolumeclaims: "5"
+
+    # The quota needs every container to declare what it counts, so this
+    # fills in what a container leaves out. CPU gets no default limit.
+    - apiVersion: v1
+      kind: LimitRange
+      metadata:
+        name: default-limit-range
+        namespace: << inputs.tenant >>
+      spec:
+        limits:
+          - type: Container
+            defaultRequest:
+              cpu: 10m
+              memory: 64Mi
+            default:
+              memory: 256Mi
+
   # The sync, in a template so each tenant's optional parts are left out
   # when unset.
   resourcesTemplate: |
