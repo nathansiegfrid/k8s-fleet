@@ -15,10 +15,9 @@ spec:
             - port: "6443"
               protocol: TCP
 
-    # RKE2 supervisor API from other nodes. `remote-node` includes worker
-    # nodes, which join through it. Don't remove it or replace it with the
-    # WireGuard CIDR below: Cilium doesn't match cluster nodes by CIDR, so
-    # the nodes would lose this port.
+    # RKE2 supervisor API from nodes. Don't remove, this does not overlap with
+    # the WireGuard CIDR below: Cilium doesn't match cluster nodes by CIDR, so
+    # would remove the nodes' access to this port.
     - fromEntities:
         - host
         - remote-node
@@ -27,8 +26,9 @@ spec:
             - port: "9345" # RKE2 supervisor API
               protocol: TCP
 
-    # The same ports from WireGuard peers that aren't cluster nodes yet: a
-    # node joining the cluster, or an admin's machine.
+    # Kubernetes API and RKE2 supervisor API from nodes that are still joining.
+    # Cilium doesn't treat them as cluster nodes yet, so the identities above
+    # won't match.
     - fromCIDR:
         - 10.0.0.0/24
       toPorts:
@@ -36,4 +36,12 @@ spec:
             - port: "6443" # Kubernetes API
               protocol: TCP
             - port: "9345" # RKE2 supervisor API
+              protocol: TCP
+
+    # Kubernetes API from VPN clients.
+    - fromCIDR:
+        - 10.0.3.0/24
+      toPorts:
+        - ports:
+            - port: "6443"
               protocol: TCP

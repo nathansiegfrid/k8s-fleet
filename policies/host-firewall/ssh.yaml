@@ -7,9 +7,9 @@ spec:
   nodeSelector:
     matchLabels: {}
   ingress:
-    # SSH only over WireGuard.
+    # SSH only from VPN clients.
     - fromCIDR:
-        - 10.0.0.0/24
+        - 10.0.3.0/24
       toPorts:
         - ports:
             - port: "22"

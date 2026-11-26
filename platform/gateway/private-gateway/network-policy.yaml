@@ -1,5 +1,5 @@
 # Load-balanced traffic goes straight to the pod, so the host firewall doesn't
-# see it: this keeps the Gateway to WireGuard clients, whatever reaches it.
+# see it: this restricts the Gateway to VPN clients.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -13,7 +13,7 @@ spec:
   ingress:
     - from:
         - ipBlock:
-            cidr: 10.0.0.0/24
+            cidr: 10.0.3.0/24
       ports:
         - port: 80
           protocol: TCP
