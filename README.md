@@ -1,44 +1,93 @@
 # k8s-fleet
 
-Flux GitOps for `homelab`, a multi-cloud RKE2 cluster: its platform components, cluster-wide policies and tenants. [k8s-infra](https://github.com/nathansiegfrid/k8s-infra) builds the nodes, then bootstraps Flux from the files in this repository.
-
-## How it reconciles
-
-The FluxInstance syncs `clusters/homelab` from `main`. Its `platform.yaml`, `policies.yaml` and `tenants.yaml` declare one Flux Kustomization per directory in `platform/`, `policies/` and `tenants/`.
-
-Flux runs in multitenant mode: cross-namespace references are off, and a Kustomization or HelmRelease that doesn't name a ServiceAccount impersonates `<namespace>:flux`. The platform's Kustomizations run as `kustomize-controller` and its HelmReleases as `helm-controller`, both cluster-admin.
+This repository holds everything that runs on `homelab`, an RKE2 cluster built from VPSs at several providers. The cluster exists to host tenants: each one gets a namespace and deploys from its own git repository, while all of them share the same nodes. [k8s-infra](https://github.com/nathansiegfrid/k8s-infra) builds the nodes and bootstraps Flux. After that, Flux keeps the cluster in sync with this repository's `main` branch.
 
 ## Layout
 
 ```
-clusters/homelab/      the cluster: its FluxInstance, and a Kustomization per component
+clusters/homelab/      the cluster's FluxInstance and a Flux Kustomization per directory below
 platform/<component>/  namespace, chart source and version, HelmRelease, values
 policies/<policy>/     cluster-wide policies: the host firewall, pods' denied egress, tenant admission
 tenants/               the tenants ResourceSet, one input per tenant
-archive/               retired clusters, not reconciled
 ```
 
-`archive/cluster-01-k3s` is the single-node k3s cluster this repository started with in April 2026, kept as a reference for its cert-manager, Envoy Gateway, Kyverno, Linkerd, monitoring and Sealed Secrets setup.
+Flux runs in multitenant mode. Cross-namespace references are turned off, and any Kustomization or HelmRelease that doesn't name a ServiceAccount impersonates `<namespace>:flux`.
 
-## Tenants
+## For tenants
 
-Each entry in `tenants/tenants.yaml` gets a namespace, a `flux` ServiceAccount that is `admin` there, and a Flux sync of its own repository that runs as that ServiceAccount. The namespace enforces Pod Security `restricted` and is in Istio's ambient mesh. The policies in `policies/tenants` keep its pods off the masters and its Services inside the cluster; traffic from outside comes through the `public-gateway` Gateway. tenant-01 attaches HTTPRoutes to its `https` listener, which serves a wildcard `*.siegfrid.com` certificate from Let's Encrypt. Another tenant gets listeners for its own domain. It CNAMEs its hostnames to `public-gateway.siegfrid.com`, or `private-gateway.siegfrid.com` for names reached over the VPN, and its `_acme-challenge` into siegfrid.com so the issuer can validate it. Plain HTTP redirects to HTTPS.
+A tenant needs only a git repository to run on the cluster. The platform handles the parts a tenant would otherwise have to set up and secure on its own: TLS certificates, DNS records, ingress from the internet, and network isolation.
+
+### Joining
+
+Each tenant is an entry in `tenants/tenants.yaml`. Flux Operator reads it and creates the tenant's namespace, a `flux` ServiceAccount with `admin` (not `cluster-admin`) rights in that namespace, and a Flux sync that pulls the tenant's repository as that ServiceAccount. Private repositories and SOPS encryption are supported: the tenant's deploy key or age key is stored encrypted in `tenants/` and copied into its namespace. After that, the tenant deploys by pushing to its own repository.
+
+### Serving a site
+
+Two shared Gateways take traffic from outside the cluster, and each runs a pod on every worker:
+
+- `public-gateway` serves on the workers' public IPs.
+- `private-gateway` serves on the workers' private IPs to VPN clients.
+
+A tenant serves its sites on its own domain, on any DNS provider, without sharing any credentials. To achieve this, two CNAME records are required from the tenant:
+
+- `*.<domain>` (or each subdomain), pointing to `public-gateway.siegfrid.com`
+- `_acme-challenge.<domain>`, pointing to `<domain>.acme.siegfrid.com`
+
+`public-gateway.siegfrid.com` is the Gateway's own DNS name. Its A records hold the workers' public IPs and are defined in [`dns-endpoint.yaml`](platform/gateway/public-gateway/dns-endpoint.yaml), so when a worker changes, every tenant's domain follows without needing a DNS change on the tenant's side.
+
+cert-manager follows the `_acme-challenge` CNAME into siegfrid.com and writes the DNS-01 challenge there. The platform then adds a listener and a Let's Encrypt certificate for the domain.
+
+To publish a site, a tenant only needs an HTTPRoute. The certificate renews on its own, and plain HTTP redirects to HTTPS.
+
+### Opening the network
+
+By default, a tenant's pods can reach only their own namespace and `kube-dns`. To reach anything else, such as the internet or another app's API, the tenant adds a NetworkPolicy to its own repository. Some addresses, such as the VPN clients and the cloud metadata service, stay blocked and can't be opened, even with the tenant's own NetworkPolicy.
+
+### Sharing the workers
+
+Each tenant gets a fixed share of the workers: by default, 1 CPU of requests, 4Gi of memory limits, 20Gi of volume claims, 20 pods and 5 volumes. A ResourceQuota enforces it, which the tenant can read but not change, and a larger share is one field on its entry in `tenants.yaml`. A container that doesn't declare its resources gets a request of 10m CPU and 64Mi memory and a memory limit of 256Mi. CPU has no default limit, so an app can use spare CPU when the node has it.
+
+### Leaving
+
+To remove a tenant, delete its entry from `inputs`. That stops its sync, but the namespace and everything running in it stay. Deleting the namespace is a separate step that someone has to take on purpose, so a typo in `tenants.yaml` can't destroy a tenant's data.
+
+## Security choices
+
+Tenants have `admin` rights in their namespaces, and their pods share nodes with no sandbox between them. So every choice below starts from the same assumption: any tenant's pod, or the app inside it, may be compromised.
+
+### A default network policy in every namespace
+
+We have `default-network-policy`, which allows pods to accept connections only from other pods in their own namespace. Without it, any pod, a tenant's included, could read every flow in the cluster from Hubble Relay, which has no login, list every Service through istiod's plaintext port, and reach other tenants' pods directly instead of going through the Gateways. All of those connections now time out. Traffic that crosses namespaces on purpose, such as webhooks, probes and the Gateways, is allowed by exceptions in each namespace's policy. If a tenant deletes its policy, Flux Operator puts it back.
+
+### Egress closed by default, with denies no allow can override
+
+In tenant namespaces, `default-network-policy` also denies egress by default, so tenant pods can connect only to their own namespace and `kube-dns`. A tenant can lift this restriction with a NetworkPolicy in its own namespace. For addresses that tenants may not access, `policies/pod-egress` adds Cilium deny rules, which win over any allow.
+
+### A host firewall, since every node faces the internet
+
+Every node is a VPS with a public IP, and the providers share no private network or firewall. The goal was for each node to expose only what the mesh needs. Cilium's host firewall, in `policies/host-firewall`, allows only ping and WireGuard from the internet. From outside the cluster, SSH and the Kubernetes API accept connections only from the VPN clients' range, `10.0.3.0/24`, which k8s-infra keeps separate from the nodes' range, and etcd accepts connections only from the masters. The firewall doesn't open HTTP or HTTPS at all: Cilium's load balancer sends that traffic straight to the Gateway pods, and their NetworkPolicies decide what gets through. A connection from the internet to a master's port 80 now times out, and the nodes can't even SSH to each other.
+
+### Admission rules for what Pod Security doesn't cover
+
+Pod Security's `restricted` level blocks root and privileged pods, but it doesn't control where a pod runs or how a Service is exposed. Both matter here. The masters run external-dns, whose Cloudflare token can rewrite every record in the zone, and a Service with external IPs can take over a node's address and port, including the Gateway's (CVE-2020-8554). Two ValidatingAdmissionPolicies in `policies/tenants` close these gaps: tenant pods can't choose a node or tolerate the masters' taint, and tenant Services can only be `ClusterIP`. Tenant pods now run only on the workers. `tenant-01` also deploys `forbidden`, a root pod that Pod Security keeps rejecting, as a standing check that the rule still holds.
+
+## Monitoring
+
+Prometheus scrapes the nodes, Kubernetes and both Gateways, whose Envoy proxies report requests by status code. The Grafana dashboards are stored in this repository. Alertmanager sends an email when a node or a scrape target goes down, a disk fills up, memory runs low, a pod is crash-looping, or one of Flux's platform objects fails to reconcile.
+
+### Previewing dashboards
+
+Grafana doesn't save edits to the dashboards it loads from this repository. To check an edit before committing it, run `./scripts/preview-dashboards.sh`. It uploads a copy of every dashboard to a "Dashboard Previews" folder, and needs the VPN and kubectl access to the `grafana-admin` Secret.
 
 ## Secrets
 
-Secrets are encrypted with [SOPS](https://getsops.io/) and age for two keys: Nathan's, to edit them, and the cluster's, so Flux can decrypt them. `.sops.yaml` holds both public keys, and k8s-infra gives Flux the cluster's private key, the `sops-age` Secret, at bootstrap. Only Kustomizations that hold secrets get `decryption`: today, `external-dns` and `cert-manager`.
-
-Create or edit one with `sops`, which encrypts on save, so plaintext never reaches the working tree:
-
-```sh
-sops platform/external-dns/cloudflare-api-token.sops.yaml
-```
+Secrets are encrypted with [SOPS](https://getsops.io/) and age for two keys: the admin's, to edit them, and the cluster's, so Flux can decrypt them. k8s-infra gives the cluster's age key to Flux during bootstrap.
 
 ## Bootstrap
 
-Flux needs a CNI to run, so Cilium has to exist before Flux does, and the FluxInstance needs Flux Operator. k8s-infra installs Cilium and Flux Operator with Helm, then applies the FluxInstance, reading everything from this repository:
+Flux needs a CNI to run, so Cilium has to be installed before Flux. k8s-infra installs Cilium and Flux Operator with Helm, then applies the FluxInstance. It reads all of these from this repository:
 
-| File | Read for |
+| File | What k8s-infra reads from it |
 | --- | --- |
 | `platform/<component>/namespace.yaml` | The namespace, with its Pod Security labels |
 | `platform/<component>/oci-repository.yaml` | Chart URL and version |
@@ -46,11 +95,11 @@ Flux needs a CNI to run, so Cilium has to exist before Flux does, and the FluxIn
 | `platform/<component>/values.yaml` | Values |
 | `clusters/homelab/flux-instance.yaml` | The FluxInstance, applied as is |
 
-Flux then adopts both Helm releases, and from there on manages them, the FluxInstance and itself. An upgrade is a change in this repository only, and the next cluster bootstraps at the same versions.
+Moving or renaming these files breaks the next bootstrap. Once the cluster is up, Flux adopts both Helm releases.
 
 ## Upgrades
 
-[Renovate](https://docs.renovatebot.com/) opens a pull request for each new chart version, with Istio's four charts grouped into one. A new Gateway API release waits for approval in the Dependency Dashboard, since its version has to be the one Istio is built against. Cilium and Flux Operator upgrades need no change in k8s-infra: the bootstrap reads the same files.
+[Renovate](https://docs.renovatebot.com/) opens a pull request for each new chart version. A new Gateway API release waits for approval in the Dependency Dashboard, because its version has to match the one Istio is built against.
 
 ## Validating
 
@@ -58,12 +107,4 @@ Flux then adopts both Helm releases, and from there on manages them, the FluxIns
 ./scripts/validate.sh
 ```
 
-It checks that every `*.sops.yaml` is encrypted, builds every kustomization, renders the tenants ResourceSet, validates all of it against the Kubernetes and CRD schemas, and checks Prometheus's rule files. It needs kustomize (or kubectl), [kubeconform](https://github.com/yannh/kubeconform), the [flux-operator CLI](https://github.com/controlplaneio-fluxcd/flux-operator/releases) and promtool, which comes with [Prometheus](https://github.com/prometheus/prometheus/releases). CI runs it on every push to `main` and on pull requests.
-
-## Previewing dashboards
-
-```sh
-./scripts/preview-dashboards.sh
-```
-
-It uploads a copy of every dashboard to a "Dashboard Previews" folder in Grafana, to see an edit before it's committed. Grafana is set to `allowUiUpdates: false` for the dashboards it loads from this repository, so it won't allow dashboard edits. Each copy keeps its title but gets its own uid, `<uid>-preview`. A copy whose file is gone is removed. It needs jq, curl, kubectl access to the `grafana-admin` Secret, and the VPN; `GRAFANA_URL` overrides the address.
+The script builds every kustomization and the tenants ResourceSet, validates the output against the Kubernetes and CRD schemas, checks Prometheus's rules, and fails if any `*.sops.yaml` file isn't encrypted. CI runs it on every push to `main` and on pull requests. It needs kustomize or kubectl, [kubeconform](https://github.com/yannh/kubeconform), the [flux-operator CLI](https://github.com/controlplaneio-fluxcd/flux-operator/releases) and promtool.
