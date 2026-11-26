@@ -61,8 +61,9 @@ spec:
           namespace: << inputs.tenant >>
 
     # The tenant's pods accept connections from its own namespace and the
-    # Gateways only, so tenants can't reach each other. A tenant could delete
-    # it, which only opens its own pods, and Flux Operator puts it back.
+    # Gateways only, so tenants can't reach each other, and connect out only
+    # to their own namespace and DNS. A tenant opens more with its own
+    # NetworkPolicies. It could delete this, and Flux Operator puts it back.
     - apiVersion: networking.k8s.io/v1
       kind: NetworkPolicy
       metadata:
@@ -70,7 +71,22 @@ spec:
         namespace: << inputs.tenant >>
       spec:
         podSelector: {}
-        policyTypes: [Ingress]
+        policyTypes: [Ingress, Egress]
+        egress:
+          - to:
+              - podSelector: {}
+          - to:
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: kube-system
+                podSelector:
+                  matchLabels:
+                    k8s-app: kube-dns
+            ports:
+              - port: 53
+                protocol: UDP
+              - port: 53
+                protocol: TCP
         ingress:
           - from:
               - podSelector: {}
