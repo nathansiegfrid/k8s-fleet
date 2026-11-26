@@ -6,7 +6,10 @@ spec:
   nodeSelector:
     matchLabels: {}
   ingress:
-    # Public: ping, ICMP errors, HTTP(S) and WireGuard.
+    # Public: ping, ICMP errors, and WireGuard.
+    # HTTP(S) ports aren't defined here. On nodes with Gateway pods, the traffic
+    # goes straight to those pods, bypassing host rules. Allow the ports from
+    # the Gateway's NetworkPolicy. Nodes without Gateway pods keep 80 and 443 closed.
     - icmps:
         - fields:
             - type: EchoRequest
@@ -22,10 +25,6 @@ spec:
               family: IPv4
     - toPorts:
         - ports:
-            - port: "80"
-              protocol: TCP
-            - port: "443"
-              protocol: TCP
             - port: "41820" # WireGuard
               protocol: UDP
 
@@ -39,8 +38,7 @@ spec:
             - port: "10250"
               protocol: TCP
 
-    # Kubelet API for metrics-server and Prometheus, which scrape every node's
-    # kubelet from their pods, so they arrive with their pods' identities.
+    # Kubelet API from metrics-server and Prometheus pods.
     - fromEndpoints:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: kube-system
@@ -54,7 +52,7 @@ spec:
             - port: "10250"
               protocol: TCP
 
-    # node-exporter, scraped by Prometheus from its pod.
+    # node-exporter from Prometheus pods.
     - fromEndpoints:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: monitoring
