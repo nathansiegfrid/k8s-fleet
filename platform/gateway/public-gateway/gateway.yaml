@@ -23,7 +23,7 @@ spec:
       allowedRoutes:
         namespaces:
           from: Same
-    - name: https
+    - name: siegfrid-com
       protocol: HTTPS
       port: 443
       hostname: "*.siegfrid.com"
