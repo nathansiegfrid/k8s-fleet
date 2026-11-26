@@ -13,7 +13,7 @@ Flux runs in multitenant mode: cross-namespace references are off, and a Kustomi
 ```
 clusters/homelab/      the cluster: its FluxInstance, and a Kustomization per component
 platform/<component>/  namespace, chart source and version, HelmRelease, values
-policies/<policy>/     cluster-wide policies: the host firewall, tenant admission
+policies/<policy>/     cluster-wide policies: the host firewall, pods' denied egress, tenant admission
 tenants/               the tenants ResourceSet, one input per tenant
 archive/               retired clusters, not reconciled
 ```

@@ -4,7 +4,7 @@
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
-  name: cloud-metadata
+  name: deny-cloud-metadata
 spec:
   endpointSelector: {}
   # Deny only this, without making every pod default-deny.

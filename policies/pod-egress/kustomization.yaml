@@ -1,0 +1,6 @@
+# What no pod may connect to, whatever its namespace's NetworkPolicies allow:
+# Cilium denies win over any allow. The nodes themselves aren't covered.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - deny-cloud-metadata.yaml

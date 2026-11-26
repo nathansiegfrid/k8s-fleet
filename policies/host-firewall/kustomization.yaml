@@ -11,4 +11,3 @@ resources:
   - rke2-all-nodes.yaml
   - rke2-api.yaml
   - rke2-etcd.yaml
-  - cloud-metadata.yaml
