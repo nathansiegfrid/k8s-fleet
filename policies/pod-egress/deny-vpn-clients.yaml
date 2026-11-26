@@ -1,0 +1,18 @@
+# No pod may connect to the VPN's clients, such as an admin's laptop or a
+# tenant's devices. WireGuard can't stop it: a pod's traffic leaves as its
+# node's address, which every client accepts.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: deny-vpn-clients
+spec:
+  endpointSelector: {}
+  # Deny only this, without making every pod default-deny.
+  enableDefaultDeny:
+    ingress: false
+    egress: false
+  egressDeny:
+    - toCIDR:
+        # The clients' range in k8s-infra's WireGuard mesh.
+        # Nodes are in 10.0.0.0/24, so this doesn't affect them.
+        - 10.0.3.0/24
