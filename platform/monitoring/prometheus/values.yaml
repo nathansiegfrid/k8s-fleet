@@ -198,6 +198,30 @@ serverFiles:
           - source_labels: [__meta_kubernetes_pod_node_name]
             target_label: node
 
+      # Kiali's port-forward to istiod is disabled, so we watch istiod here:
+      # whether it's up, how many proxies are connected, and whether they accept
+      # its config. Kiali's control-plane page reads these from Prometheus too.
+      - job_name: istiod
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: [istio-system]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            regex: istiod
+            action: keep
+          - source_labels: [__meta_kubernetes_pod_ip]
+            replacement: ${1}:15014
+            target_label: __address__
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            target_label: app
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            target_label: node
+
       # Each node's ztunnel: TCP traffic between ambient pods, for Kiali's
       # graph. Kiali finds these series by `app="ztunnel"`.
       - job_name: ztunnel

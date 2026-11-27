@@ -63,6 +63,32 @@ spec:
           protocol: TCP
 
 ---
+# Prometheus scrapes istiod's metrics, which replace what Kiali read from
+# istiod by port-forward.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: istiod-prometheus
+  namespace: istio-system
+spec:
+  podSelector:
+    matchLabels:
+      app: istiod
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: server
+      ports:
+        - port: 15014
+          protocol: TCP
+
+---
 # Prometheus scrapes ztunnel's traffic metrics, which Kiali's graph uses.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
