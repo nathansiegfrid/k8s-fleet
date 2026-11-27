@@ -73,7 +73,19 @@ Pod Security's `restricted` level blocks root and privileged pods, but it doesn'
 
 ## Monitoring
 
-Prometheus scrapes the nodes, Kubernetes and both Gateways, whose Envoy proxies report requests by status code. The Grafana dashboards are stored in this repository. Alertmanager sends an email when a node or a scrape target goes down, a disk fills up, memory runs low, a pod is crash-looping, or one of Flux's platform objects fails to reconcile.
+Prometheus scrapes the nodes, Kubernetes, istiod, every node's ztunnel and both Gateways, whose Envoy proxies report requests by status code. The Grafana dashboards are stored in this repository. Alertmanager sends an email when a node or a scrape target goes down, a disk fills up, memory runs low, a pod is crash-looping, a proxy stops getting istiod's config, or one of Flux's platform objects fails to reconcile.
+
+### Logging in to Kiali
+
+Kiali is accessible at `https://kiali.siegfrid.org` over the VPN. It's read-only and asks for a token of the custom `kiali-login` ServiceAccount, which excludes Secrets. Create a long-lived token and keep it in a password manager:
+
+```sh
+kubectl -n monitoring create token kiali-login --duration=87600h
+```
+
+To revoke every token, delete and recreate the ServiceAccount.
+
+Because a port-forward bypasses NetworkPolicies, it is removed from Kiali's role. As a result, Kiali's proxy sync status and ztunnel views are disabled. You can get the same information from your own machine with `istioctl proxy-status` and `istioctl ztunnel-config`, and Grafana's Istio Control Plane dashboard shows istiod's health. Port-forward to the `gateway` namespace is explicitly allowed for the Gateways' Envoy tab.
 
 ### Previewing dashboards
 
