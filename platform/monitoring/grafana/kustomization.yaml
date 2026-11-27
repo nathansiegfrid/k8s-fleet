@@ -20,5 +20,6 @@ configMapGenerator:
       - dashboards/cluster-usage.json
       - dashboards/cluster-allocation.json
       - dashboards/cluster-health.json
+      - dashboards/istio-control-plane.json
     options:
       disableNameSuffixHash: true
