@@ -1,0 +1,21 @@
+# kube-state-metrics has no login, so only Prometheus, which scrapes it,
+# may connect. Without this, any pod could read every object's metrics.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kube-state-metrics
+  namespace: monitoring
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kube-state-metrics
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: server
+      ports:
+        - port: 8080
+          protocol: TCP

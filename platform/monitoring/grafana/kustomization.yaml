@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - oci-repository.yaml
   - helm-release.yaml
+  - network-policy.yaml
   - http-route.yaml
   # Created with `sops`, so it's never in git in plaintext.
   - grafana-admin.sops.yaml

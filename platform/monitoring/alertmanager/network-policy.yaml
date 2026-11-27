@@ -1,0 +1,31 @@
+# Alertmanager has no login. Prometheus sends and scrapes; Grafana shows
+# alerts and silences.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alertmanager
+  namespace: monitoring
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: alertmanager
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: server
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: grafana
+        # Flux's alerts, from flux-alerts/.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: flux-system
+          podSelector:
+            matchLabels:
+              app: notification-controller
+      ports:
+        - port: 9093
+          protocol: TCP
