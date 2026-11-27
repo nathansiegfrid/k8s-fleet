@@ -197,3 +197,27 @@ serverFiles:
             target_label: pod
           - source_labels: [__meta_kubernetes_pod_node_name]
             target_label: node
+
+      # Each node's ztunnel: TCP traffic between ambient pods, for Kiali's
+      # graph. Kiali finds these series by `app="ztunnel"`.
+      - job_name: ztunnel
+        metrics_path: /stats/prometheus
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: [istio-system]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            regex: ztunnel
+            action: keep
+          - source_labels: [__meta_kubernetes_pod_ip]
+            replacement: ${1}:15020
+            target_label: __address__
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            target_label: app
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            target_label: node

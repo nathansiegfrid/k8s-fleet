@@ -63,6 +63,31 @@ spec:
           protocol: TCP
 
 ---
+# Prometheus scrapes ztunnel's traffic metrics, which Kiali's graph uses.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ztunnel-prometheus
+  namespace: istio-system
+spec:
+  podSelector:
+    matchLabels:
+      app: ztunnel
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: server
+      ports:
+        - port: 15020
+          protocol: TCP
+
+---
 # The API server calls istiod's webhooks to check Istio's objects and to
 # inject the Gateways' pods. From the other masters, the call comes from
 # their pod-network address, not the API server's, so it doesn't match
