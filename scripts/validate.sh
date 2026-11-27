@@ -17,7 +17,7 @@ while IFS= read -r file; do
     echo "not encrypted: $file" >&2
     status=1
   fi
-done < <(find . -name '*.sops.yaml' -not -name .sops.yaml -not -path './.git/*' -not -path './archive/*')
+done < <(find . -name '*.sops.yaml' -not -name .sops.yaml -not -path './.git/*')
 
 build() {
   if command -v kustomize >/dev/null; then kustomize build "$1"; else kubectl kustomize "$1"; fi
@@ -33,7 +33,7 @@ while IFS= read -r file; do
   dir=$(dirname "$file")
   echo "==> $dir"
   build "$dir" | kubeconform -strict -summary -skip Secret "${schemas[@]}" || status=1
-done < <(find . -name kustomization.yaml -not -path './.git/*' -not -path './archive/*' | sort)
+done < <(find . -name kustomization.yaml -not -path './.git/*' | sort)
 
 # kubeconform only sees the ResourceSet itself, not what it generates.
 while IFS= read -r file; do

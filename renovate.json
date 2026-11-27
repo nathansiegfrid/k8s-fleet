@@ -3,9 +3,6 @@
   "extends": [
     "config:recommended"
   ],
-  "ignorePaths": [
-    "archive/**"
-  ],
   "flux": {
     "managerFilePatterns": [
       "/^(clusters|platform|policies|tenants)/.+\\.ya?ml$/"
