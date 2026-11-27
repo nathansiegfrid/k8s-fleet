@@ -39,6 +39,30 @@ spec:
           protocol: TCP
 
 ---
+# Kiali reads istiod's version and status from its monitoring port.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: istiod-kiali
+  namespace: istio-system
+spec:
+  podSelector:
+    matchLabels:
+      app: istiod
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kiali
+      ports:
+        - port: 15014
+          protocol: TCP
+
+---
 # The API server calls istiod's webhooks to check Istio's objects and to
 # inject the Gateways' pods. From the other masters, the call comes from
 # their pod-network address, not the API server's, so it doesn't match
