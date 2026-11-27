@@ -1,0 +1,24 @@
+groups:
+  - name: istio
+    rules:
+      # A proxy refused istiod's config, so it keeps running on its old one.
+      # istiod only creates this metric after the first rejection.
+      - alert: IstioConfigRejected
+        expr: sum by (type) (increase(pilot_total_xds_rejects[10m])) > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: "Proxies rejected istiod's {{ $labels.type }} config"
+
+      # Fewer proxies are connected to istiod than ztunnel and Gateway pods
+      # are Ready, so some stopped receiving config changes.
+      - alert: IstioProxiesDisconnected
+        expr: |
+          sum(pilot_xds)
+            < sum(kube_pod_status_ready{condition="true", namespace="istio-system", pod=~"ztunnel-.*"})
+              + sum(kube_pod_status_ready{condition="true", namespace="gateway"})
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $value }} proxies are connected to istiod, fewer than the ztunnel and Gateway pods Ready"

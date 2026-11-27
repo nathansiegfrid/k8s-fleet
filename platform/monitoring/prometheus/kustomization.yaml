@@ -27,5 +27,6 @@ configMapGenerator:
       - rules/targets.yaml
       - rules/kubernetes.yaml
       - rules/monitoring.yaml
+      - rules/istio.yaml
     options:
       disableNameSuffixHash: true
