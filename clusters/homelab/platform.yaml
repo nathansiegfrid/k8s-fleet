@@ -211,6 +211,24 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: node-exporter
+  namespace: flux-system
+spec:
+  serviceAccountName: kustomize-controller
+  interval: 10m
+  timeout: 5m
+
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./platform/node-exporter
+  prune: true
+  wait: true
+
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: monitoring
   namespace: flux-system
 spec:

@@ -1,0 +1,9 @@
+# Each node's own metrics, in the node-exporter namespace. It has no
+# NetworkPolicy: it runs on the host network, so the host firewall's
+# rke2-all-nodes lets only Prometheus reach its 9100.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - oci-repository.yaml
+  - helm-release.yaml

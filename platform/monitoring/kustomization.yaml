@@ -1,11 +1,10 @@
-# The monitoring stack, one folder per part. The namespaces and the
+# The monitoring stack, one folder per part. The namespace and the
 # NetworkPolicies are shared, so they stay here for now.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - namespaces.yaml
+  - namespace.yaml
   - network-policies.yaml
-  - node-exporter
   - kube-state-metrics
   - prometheus
   - alertmanager
