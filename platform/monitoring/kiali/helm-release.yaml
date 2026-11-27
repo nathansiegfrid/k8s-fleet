@@ -31,3 +31,7 @@ spec:
     external_services:
       prometheus:
         url: http://prometheus-server.monitoring.svc
+      # Kiali's Grafana links are for Istio's dashboards, and our Grafana has none.
+      # Connecting the two would also need a Grafana login for Kiali.
+      grafana:
+        enabled: false
