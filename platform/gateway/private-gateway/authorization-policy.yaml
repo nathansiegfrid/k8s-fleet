@@ -1,0 +1,27 @@
+# Every VPN client reaches this Gateway, so we list which names each one may
+# open, and Envoy rejects the rest with a 403. A client added to the VPN gets
+# nothing here until it's listed.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: private-gateway
+  namespace: gateway
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: private-gateway
+  action: ALLOW
+  rules:
+    # Admin machines: every private name.
+    - from:
+        - source:
+            ipBlocks: [10.0.3.1/32, 10.0.3.2/32]
+    # A tenant's device: Kiali, which shows what its own token can read. The
+    # Host header can carry a port, so each name is listed with one too.
+    - from:
+        - source:
+            ipBlocks: [10.0.3.3/32]
+      to:
+        - operation:
+            hosts: [kiali.siegfrid.org, "kiali.siegfrid.org:*"]

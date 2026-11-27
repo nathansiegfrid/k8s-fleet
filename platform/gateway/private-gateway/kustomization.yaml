@@ -4,6 +4,7 @@ resources:
   - gateway.yaml
   - dns-endpoint.yaml
   - network-policy.yaml
+  - authorization-policy.yaml
   - ip-pool.yaml
   - helm-release.yaml
   - pdb.yaml
