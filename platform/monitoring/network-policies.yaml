@@ -25,7 +25,7 @@ spec:
           protocol: TCP
 
 ---
-# Only Grafana queries Prometheus.
+# Only Grafana and Kiali query Prometheus.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -42,6 +42,9 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: grafana
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kiali
       ports:
         - port: 9090
           protocol: TCP
