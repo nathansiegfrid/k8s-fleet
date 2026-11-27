@@ -11,6 +11,21 @@ spec:
   hostnames:
     - kiali.siegfrid.org
   rules:
+    # Kiali sends no cache headers, so the browser reloads ~13MB each time.
+    # These names change with each release, so they can be cached for good.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /static/
+      filters:
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            set:
+              - name: Cache-Control
+                value: public, max-age=31536000, immutable
+      backendRefs:
+        - name: kiali
+          port: 20001
     - backendRefs:
         - name: kiali
           port: 20001
