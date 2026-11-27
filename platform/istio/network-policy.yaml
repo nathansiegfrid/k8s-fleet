@@ -137,9 +137,9 @@ spec:
               protocol: TCP
 
 ---
-# Ambient mode rewrites kubelet probes to come from 169.254.7.127, which
-# Cilium sees as `world`. Clusterwide, since a namespaced policy can only
-# select its own namespace's pods, and ambient pods are in every tenant's.
+# Cilium always allows kubelet probes from the pod's own node, but ambient
+# mode rewrites them to come from 169.254.7.127, which Cilium sees as `world`.
+# Clusterwide, since ambient pods are in every tenant's namespace.
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
