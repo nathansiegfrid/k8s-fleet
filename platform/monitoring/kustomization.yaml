@@ -11,3 +11,4 @@ resources:
   - alertmanager
   - flux-alerts
   - grafana
+  - kiali
