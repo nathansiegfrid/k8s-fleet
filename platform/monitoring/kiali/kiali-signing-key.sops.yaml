@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: kiali-signing-key
+    namespace: monitoring
+data:
+    key: ENC[AES256_GCM,data:r16dK2YwDL60PM8p9eS4OE9ei9/O7/0wV+lHMtBJRgpyJ2NX/xOTJoW/7k0=,iv:7AqUT1wFl22IWNosrpFarmqwGqTqI3QJP49Frg/jO0A=,tag:44vmXJ6NoyMtQkmo+5InLQ==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA4WHhGMVFmQTQvbW0xMmtv
+            Q09KQ2twSUgrL2phQ1A0MXBsTEFmaVZCRFhNCmQ0UW1PU0I0RFYyN3RqbTFNZnp0
+            WnM3aldpOXJsalhKSVd1dXlxZHl1NWcKLS0tICtNMGJheG1Ia1RlTUJwN0UvYWhS
+            ZGtLRmJjT2tJYU15TW9pc0xvVVdGeDAKvNGtd80ZBxGHhbijzW919suF0Ox9eNDD
+            NbejoXU9+B21FB0VnN7ipSGg2I/9oENLV19akcNccxe0YkF4DxC+YQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age14ffhzy8v4ed9kr0fertclh3tvevppa7ygxl5gkep8h7w8ys8ny3scnsqsf
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBhRnMxTnl2OFZXNURIalRZ
+            dnNpdUNXS0FhTXJGMTJ6Z1JqbHNrVS94clFJCmVqQzArMVJVM084VUpIV05oN3gy
+            SjZKTU5Dd2hiMEp6ZitVSFNHUERPdjAKLS0tIDBObGkzSDQ1RlNEdTFxMU9xamhj
+            M2E3OXMxa1pZMHVodnhEaHEwNzFTUUEKmfrQVevhio6+HAmByhUXVY/2XYsEHQD6
+            NIH0BtwJ+tEiVY7cJ7FcjktcD7a4xVxJz9xyy+PO4YA0XJzItN0YUQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1t3f664zrvst5vgwvum90pdpllw85dc9h56v7yl6dg443aaw7ng4s7uhgd0
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-27T12:39:43Z"
+    mac: ENC[AES256_GCM,data:ZAXjeUVTMwRQEo9RgaBbDTvJCXraXSpaEKcrFTq0NKLlTwL/Zv0XG1h+Ckzme+dRG2NOMjTywKD2I10khFuyMDAqLBCngZFlnO8jnZEAAIhulDit7fgU36xD/co18kF8jeqIAJaMbqVdxPr9qvOEg2IQTaMS7UasjZbRJ0MUR7g=,iv:6IQm1zAGktvBIvimJ60b1IHULMJXgAlQaxHv05LW0ao=,tag:SebDaPvhs9UosOW623oqrQ==,type:str]
+    version: 3.13.3

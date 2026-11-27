@@ -1,4 +1,4 @@
-# Kiali with custom network policy.
+# Kiali with custom network policy and login account.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -6,3 +6,6 @@ resources:
   - helm-release.yaml
   - http-route.yaml
   - network-policy.yaml
+  - login.yaml
+  # Created with `sops`, so it's never in git in plaintext.
+  - kiali-signing-key.sops.yaml

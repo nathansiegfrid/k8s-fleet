@@ -22,11 +22,14 @@ spec:
   storageNamespace: monitoring
 
   values:
-    # No login for now: anyone on the VPN who reaches the private Gateway
-    # can use it. To be tightened once its traffic has been observed.
+    # Log in with a token for kiali-login. RBAC defined in login.yaml.
     auth:
-      strategy: anonymous
-    # Read-only, so anonymous users can't change the mesh's config.
+      strategy: token
+    # A fixed key which lasts 30 days, so upgrades don't end the session.
+    login_token:
+      signing_key: secret:kiali-signing-key:key
+      expiration_seconds: 2592000
+    # Read-only, so Kiali can't change the mesh's config.
     deployment:
       view_only_mode: true
       # The chart's default policy lets any pod in.
