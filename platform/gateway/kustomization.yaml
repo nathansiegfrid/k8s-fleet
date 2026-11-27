@@ -7,3 +7,4 @@ resources:
   - public-gateway
   - private-gateway
   - https-redirect.yaml
+  - kiali-port-forward.yaml

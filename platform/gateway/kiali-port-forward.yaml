@@ -1,0 +1,27 @@
+# We allow Kiali to port-forward here only, for its Envoy tab on the Gateways.
+# Port-forward bypasses NetworkPolicies, so a compromised Kiali could stop the
+# Gateways through Envoy's admin port, but it can't reach any other pod.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kiali-port-forward
+  namespace: gateway
+rules:
+  - apiGroups: [""]
+    resources: [pods/portforward]
+    verbs: [create]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kiali-port-forward
+  namespace: gateway
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kiali-port-forward
+subjects:
+  - kind: ServiceAccount
+    name: kiali
+    namespace: monitoring

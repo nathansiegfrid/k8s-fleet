@@ -45,3 +45,22 @@ spec:
       # Connecting the two would also need a Grafana login for Kiali.
       grafana:
         enabled: false
+      # Kiali polls istiod by port-forward, which it can't do any more.
+      istio:
+        istio_api_enabled: false
+
+  # Port-forward bypasses every NetworkPolicy, so Kiali gets it in the
+  # gateway namespace only, from platform/gateway/kiali-port-forward.yaml.
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: ClusterRole
+              name: kiali-viewer
+            # The test fails the upgrade if a new chart moves the rule.
+            patch: |
+              - op: test
+                path: /rules/2/resources
+                value: [pods/portforward]
+              - op: remove
+                path: /rules/2
