@@ -29,6 +29,10 @@ spec:
     # Read-only, so anonymous users can't change the mesh's config.
     deployment:
       view_only_mode: true
+      # The chart's default policy lets any pod in.
+      # We define our own in network-policy.yaml.
+      network_policy:
+        enabled: false
     server:
       web_root: /
     external_services:

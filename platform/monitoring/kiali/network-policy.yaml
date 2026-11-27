@@ -1,0 +1,22 @@
+# Only the private Gateway needs to reach Kiali.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kiali
+  namespace: monitoring
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kiali
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: gateway
+          podSelector:
+            matchLabels:
+              gateway.networking.k8s.io/gateway-name: private-gateway
+      ports:
+        - port: 20001
+          protocol: TCP

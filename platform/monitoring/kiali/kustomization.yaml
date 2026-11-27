@@ -1,7 +1,8 @@
-# Kiali and its route on the private Gateway.
+# Kiali with custom network policy.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - helm-repository.yaml
   - helm-release.yaml
   - http-route.yaml
+  - network-policy.yaml
