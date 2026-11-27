@@ -26,6 +26,9 @@ spec:
     # can use it. To be tightened once its traffic has been observed.
     auth:
       strategy: anonymous
+    # Read-only, so anonymous users can't change the mesh's config.
+    deployment:
+      view_only_mode: true
     server:
       web_root: /
     external_services:
