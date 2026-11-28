@@ -12,8 +12,8 @@ spec:
     solvers:
       - dns01:
           # Follow `_acme-challenge` CNAMEs when placing the TXT record. This lets
-          # domains with DNS hosted elsewhere delegate validation to siegfrid.com:
-          # CNAME `_acme-challenge.<domain>` to `<domain>.acme.siegfrid.com`.
+          # domains with DNS hosted elsewhere delegate validation to siegfrid.org:
+          # CNAME `_acme-challenge.<domain>` to `<domain>.acme.siegfrid.org`.
           cnameStrategy: Follow
           cloudflare:
             apiTokenSecretRef:
