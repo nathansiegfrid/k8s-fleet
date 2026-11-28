@@ -25,7 +25,13 @@ spec:
             hosts:
               - kiali.siegfrid.org
               - kiali.siegfrid.org:443
-    # Admin machines: every private name.
+    # Admin machines: the platform's own hosts only, not tenants' domains.
+    # Admin can still access any pod through `kubectl port-forward`.
     - from:
         - source:
             ipBlocks: [10.0.3.1/32, 10.0.3.2/32]
+      to:
+        - operation:
+            hosts:
+              - "*.siegfrid.org"
+              - "*.siegfrid.org:443"
