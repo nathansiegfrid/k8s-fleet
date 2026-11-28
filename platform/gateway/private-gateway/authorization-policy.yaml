@@ -1,6 +1,8 @@
 # Every VPN client reaches this Gateway, so we list which names each one may
-# open, and Envoy rejects the rest with a 403. A client added to the VPN gets
-# nothing here until it's listed.
+# open, and Envoy rejects the rest with a 403. A client added to the VPN can
+# access only the private hosts explicitly allowed here.
+# Each host is listed both with and without :443 because some clients include
+# the port in the Host header.
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
@@ -13,15 +15,17 @@ spec:
       name: private-gateway
   action: ALLOW
   rules:
+    # Allow Kiali for all VPN clients.
+    # Kiali shows only what the client's own token is permitted to read.
+    - from:
+        - source:
+            ipBlocks: [10.0.3.0/24]
+      to:
+        - operation:
+            hosts:
+              - kiali.siegfrid.org
+              - kiali.siegfrid.org:443
     # Admin machines: every private name.
     - from:
         - source:
             ipBlocks: [10.0.3.1/32, 10.0.3.2/32]
-    # A tenant's device: Kiali, which shows what its own token can read. The
-    # Host header can carry a port, so each name is listed with one too.
-    - from:
-        - source:
-            ipBlocks: [10.0.3.3/32]
-      to:
-        - operation:
-            hosts: [kiali.siegfrid.org, "kiali.siegfrid.org:*"]
