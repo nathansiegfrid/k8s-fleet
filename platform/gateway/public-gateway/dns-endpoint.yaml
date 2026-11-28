@@ -7,6 +7,12 @@ metadata:
   namespace: gateway
 spec:
   endpoints:
+    - dnsName: public-gateway.siegfrid.org
+      recordType: A
+      targets:
+        - 156.67.221.137
+        - 101.32.127.208
+    # The old name, until nothing points at it.
     - dnsName: public-gateway.siegfrid.com
       recordType: A
       targets:

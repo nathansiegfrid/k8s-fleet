@@ -5,9 +5,9 @@ metadata:
   namespace: gateway
   annotations:
     # external-dns creates a CNAME for each tenant hostname routed through
-    # this Gateway, pointing at public-gateway.siegfrid.com.
+    # this Gateway, pointing at public-gateway.siegfrid.org.
     # The actual IPs are defined in dns-endpoint.yaml.
-    external-dns.kubernetes.io/target: public-gateway.siegfrid.com
+    external-dns.kubernetes.io/target: public-gateway.siegfrid.org
 spec:
   gatewayClassName: istio
   # Use the Service defined in helm-release.yaml instead of having istiod
