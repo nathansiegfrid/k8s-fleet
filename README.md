@@ -41,7 +41,7 @@ To publish a site, a tenant only needs an HTTPRoute. The certificate renews on i
 
 ### Opening the network
 
-By default, a tenant's pods can reach only their own namespace and `kube-dns`. To reach anything else, such as the internet or another app's API, the tenant adds a NetworkPolicy to its own repository. Some addresses, such as the VPN clients and the cloud metadata service, stay blocked and can't be opened, even with the tenant's own NetworkPolicy.
+By default, a tenant's pods can reach only their own namespace and `kube-dns`. To reach anything else, such as the internet or another app's API, the tenant adds a NetworkPolicy or a CiliumNetworkPolicy to its own repository. Some addresses, such as the VPN clients and the cloud metadata service, stay blocked and can't be opened, even when the tenant's own policies attempt to allow them.
 
 ### Sharing the workers
 
@@ -61,7 +61,7 @@ We have `default-network-policy`, which allows pods to accept connections only f
 
 ### Egress closed by default, with denies no allow can override
 
-In tenant namespaces, `default-network-policy` also denies egress by default, so tenant pods can connect only to their own namespace and `kube-dns`. A tenant can lift this restriction with a NetworkPolicy in its own namespace. For addresses that tenants may not access, `policies/pod-egress` adds Cilium deny rules, which win over any allow.
+In tenant namespaces, `default-network-policy` also denies egress by default, so tenant pods can connect only to their own namespace and `kube-dns`. A tenant can lift this restriction with a network policy in its own namespace. For addresses that tenants may not access, `policies/pod-egress` adds Cilium deny rules, which win over any allow.
 
 ### A host firewall, since every node faces the internet
 

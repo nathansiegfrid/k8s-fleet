@@ -1,0 +1,16 @@
+# Extend permissions for the `admin` role, which is used by tenants.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: tenant-admin
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+rules:
+  # Let tenants attach HTTPRoutes to the shared Gateway.
+  - apiGroups: [gateway.networking.k8s.io]
+    resources: [httproutes]
+    verbs: [get, list, watch, create, update, patch, delete, deletecollection]
+  # Let tenants create CiliumNetworkPolicies.
+  - apiGroups: [cilium.io]
+    resources: [ciliumnetworkpolicies]
+    verbs: [get, list, watch, create, update, patch, delete, deletecollection]
