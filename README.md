@@ -30,12 +30,12 @@ Two shared Gateways take traffic from outside the cluster, and each runs a pod o
 
 A tenant serves its sites on its own domain, on any DNS provider, without sharing any credentials. To achieve this, two CNAME records are required from the tenant:
 
-- `*.<domain>` (or each subdomain), pointing to `public-gateway.siegfrid.com`
-- `_acme-challenge.<domain>`, pointing to `<domain>.acme.siegfrid.com`
+- `*.<domain>` (or each subdomain), pointing to `public-gateway.siegfrid.org`
+- `_acme-challenge.<domain>`, pointing to `<domain>.acme.siegfrid.org`
 
-`public-gateway.siegfrid.com` is the Gateway's own DNS name. Its A records hold the workers' public IPs and are defined in [`dns-endpoint.yaml`](platform/gateway/public-gateway/dns-endpoint.yaml), so when a worker changes, every tenant's domain follows without needing a DNS change on the tenant's side.
+`public-gateway.siegfrid.org` is the Gateway's own DNS name. Its A records hold the workers' public IPs and are defined in [`dns-endpoint.yaml`](platform/gateway/public-gateway/dns-endpoint.yaml), so when a worker changes, every tenant's domain follows without needing a DNS change on the tenant's side.
 
-cert-manager follows the `_acme-challenge` CNAME into siegfrid.com and writes the DNS-01 challenge there. The platform then adds a listener and a Let's Encrypt certificate for the domain.
+cert-manager follows the `_acme-challenge` CNAME into siegfrid.org, and writes the DNS-01 challenge there. The platform then adds a listener and a Let's Encrypt certificate for the domain.
 
 To publish a site, a tenant only needs an HTTPRoute. The certificate renews on its own, and plain HTTP redirects to HTTPS.
 
