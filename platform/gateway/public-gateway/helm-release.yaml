@@ -28,7 +28,7 @@ spec:
   values:
     kind: DaemonSet
     nodeSelector:
-      siegfrid.com/public-gateway: "true"
+      siegfrid.org/public-gateway: "true"
     autoscaling:
       enabled: false
     labels:
