@@ -149,7 +149,7 @@ spec:
     apiVersion: source.toolkit.fluxcd.io/v1
     kind: GitRepository
     metadata:
-      name: apps
+      name: tenant
       namespace: << inputs.tenant >>
     spec:
       interval: 5m
@@ -158,13 +158,13 @@ spec:
         branch: << inputs.branch >>
       <<- if get inputs "private" >>
       secretRef:
-        name: apps-git
+        name: tenant-git
       <<- end >>
     ---
     apiVersion: kustomize.toolkit.fluxcd.io/v1
     kind: Kustomization
     metadata:
-      name: apps
+      name: tenant
       namespace: << inputs.tenant >>
     spec:
       serviceAccountName: flux
@@ -172,7 +172,7 @@ spec:
       interval: 10m
       sourceRef:
         kind: GitRepository
-        name: apps
+        name: tenant
       path: << get inputs "path" | default "./" >>
       prune: true
       # Leave the tenant's workloads running if this Kustomization is
@@ -190,7 +190,7 @@ spec:
     apiVersion: v1
     kind: Secret
     metadata:
-      name: apps-git
+      name: tenant-git
       namespace: << inputs.tenant >>
       annotations:
         fluxcd.controlplane.io/copyFrom: flux-system/<< inputs.tenant >>-git

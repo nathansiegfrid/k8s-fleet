@@ -1,5 +1,5 @@
 # tenant-01-workbench's read-only deploy key for its private repository.
-# The tenants ResourceSet copies it into tenant-01-workbench as `apps-git`.
+# The tenants ResourceSet copies it into tenant-01-workbench as `tenant-git`.
 apiVersion: v1
 kind: Secret
 metadata:
