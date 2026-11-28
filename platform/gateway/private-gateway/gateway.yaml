@@ -16,6 +16,11 @@ spec:
   addresses:
     - type: Hostname
       value: private-gateway.gateway.svc.cluster.local
+  # Tenants' own listeners come from ListenerSets that the platform writes in
+  # this namespace. Tenants can't add listeners from theirs.
+  allowedListeners:
+    namespaces:
+      from: Same
   listeners:
     # Plain-HTTP listener. Only for HTTPS redirect (https-redirect.yaml).
     - name: http
