@@ -7,9 +7,11 @@ spec:
   nodeSelector:
     matchLabels: {}
   ingress:
-    # SSH only from VPN clients.
+    # SSH only from the admin's primary machine.
+    # If the primary machine is lost, we can access the nodes through
+    # the cloud's web console (tested for current cloud provider).
     - fromCIDR:
-        - 10.0.3.0/24
+        - 10.0.3.1/32
       toPorts:
         - ports:
             - port: "22"
