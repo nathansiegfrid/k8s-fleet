@@ -9,7 +9,7 @@ spec:
   # Optional per tenant: `path` in the repository, `./` by default;
   # `private: true` to clone with the deploy key in `<tenant>-git`; and
   # `sops: true` to decrypt with the age key in `<tenant>-sops-age`. Both
-  # Secrets are in this namespace, SOPS-encrypted in this folder.
+  # Secrets are in this namespace, SOPS-encrypted in `secrets/`.
   inputs:
     - tenant: tenant-01
       repository: https://github.com/nathansiegfrid/k8s-apps

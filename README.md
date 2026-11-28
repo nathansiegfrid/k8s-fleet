@@ -19,7 +19,7 @@ A tenant needs only a git repository to run on the cluster. The platform handles
 
 ### Joining
 
-Each tenant is an entry in `tenants/tenants.yaml`. Flux Operator reads it and creates the tenant's namespace, a `flux` ServiceAccount with `admin` (not `cluster-admin`) rights in that namespace, and a Flux sync that pulls the tenant's repository as that ServiceAccount. Private repositories and SOPS encryption are supported: the tenant's deploy key or age key is stored encrypted in `tenants/` and copied into its namespace. After that, the tenant deploys by pushing to its own repository.
+Each tenant is an entry in `tenants/tenants.yaml`. Flux Operator reads it and creates the tenant's namespace, a `flux` ServiceAccount with `admin` (not `cluster-admin`) rights in that namespace, and a Flux sync that pulls the tenant's repository as that ServiceAccount. Private repositories and SOPS encryption are supported: the tenant's deploy key or age key is stored encrypted in `tenants/secrets/` and copied into its namespace. After that, the tenant deploys by pushing to its own repository.
 
 ### Serving a site
 

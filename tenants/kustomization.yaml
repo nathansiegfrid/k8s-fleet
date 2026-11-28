@@ -3,6 +3,4 @@ kind: Kustomization
 resources:
   - tenant-admin.yaml
   - tenants.yaml
-  # Created with `sops`, so they're never in git in plaintext.
-  - tenant-01-workbench-git.sops.yaml
-  - tenant-01-workbench-sops-age.sops.yaml
+  - secrets
