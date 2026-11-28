@@ -1,0 +1,34 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cloudnative-pg
+  namespace: flux-system
+spec:
+  serviceAccountName: helm-controller
+  interval: 1h
+  timeout: 5m
+  chartRef:
+    kind: OCIRepository
+    name: cloudnative-pg
+  releaseName: cloudnative-pg
+  targetNamespace: cnpg-system
+  storageNamespace: cnpg-system
+  values:
+    # Add CNPG's roles to `admin`, so tenants can run their own databases.
+    rbac:
+      aggregateClusterRoles: true
+    # On the masters, where tenants' pods can't run: the operator writes Pods
+    # and Secrets in every namespace.
+    nodeSelector:
+      node-role.kubernetes.io/control-plane: "true"
+    tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+    resources:
+      requests:
+        cpu: 10m
+        memory: 128Mi
+      limits:
+        cpu: 1000m
+        memory: 512Mi
